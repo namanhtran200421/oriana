@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="wax" cx="38%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#b8475a"/>
+      <stop offset=".45" stop-color="#8b2635"/>
+      <stop offset="1" stop-color="#4f111c"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#wax)"/>
+  <circle cx="32" cy="32" r="21" fill="none" stroke="#5a1420" stroke-width="2"/>
+  <text x="32" y="33" text-anchor="middle" dominant-baseline="central" font-family="Cinzel, Georgia, serif" font-size="26" fill="#c9a962">O</text>
+</svg>

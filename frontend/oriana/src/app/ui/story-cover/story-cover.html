@@ -1,0 +1,9 @@
+@if (story().cover; as src) {
+  <img class="story-cover__image sepia" [src]="src" alt="" draggable="false" />
+} @else {
+  <div class="story-cover__plate">
+    <span class="story-cover__numeral">{{ volume() | roman }}</span>
+    <span class="story-cover__glyph" aria-hidden="true">❦</span>
+    <span class="story-cover__title">{{ story().title }}</span>
+  </div>
+}

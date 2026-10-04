@@ -1,0 +1,98 @@
+<header class="masthead">
+  <a class="masthead__brand" routerLink="/">
+    <app-wax-seal [size]="40" [monogram]="site.monogram" />
+    <span class="overline">{{ site.title }}</span>
+  </a>
+  <div class="masthead__aside">
+    <span class="masthead__count overline overline--muted">
+      {{ stories.length | roman }} · {{ labels.stories }}
+    </span>
+    <app-music-toggle />
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="library-title">
+    <p class="overline reveal" style="--d: 0">{{ labels.justForYou }}</p>
+    <h1 id="library-title" class="hero__title reveal" style="--d: 1">{{ site.title }}</h1>
+    <div class="ornate-divider reveal" style="--d: 2" aria-hidden="true">✶</div>
+  </section>
+
+  <section class="preface" aria-labelledby="preface-title">
+    <article class="preface__certificate ornate-frame" appReveal>
+      <p class="overline overline--flanked">{{ site.preface.label }}</p>
+      <h2 id="preface-title" class="preface__heading">{{ site.preface.heading }}</h2>
+      <div class="ornate-divider ornate-divider--wide" aria-hidden="true">❦</div>
+      <div class="preface__body">
+        @for (paragraph of site.preface.paragraphs; track $index) {
+          <p [class.drop-cap]="$first">{{ paragraph }}</p>
+        }
+      </div>
+      <p class="preface__signature">— {{ site.preface.signature }}</p>
+    </article>
+  </section>
+
+  <section class="shelf" aria-labelledby="shelf-title">
+    <header class="shelf__head" appReveal>
+      <p class="overline">{{ labels.theShelf }}</p>
+      <h2 id="shelf-title" class="shelf__title">{{ labels.yourStories }}</h2>
+    </header>
+
+    <ul class="shelf__grid">
+      @for (story of stories; track story.slug; let i = $index) {
+        @let mark = marks()[story.slug];
+        @let detail = details()[story.slug];
+        <li appReveal [style.--d]="i">
+          <a class="card" [routerLink]="['/read', story.slug]">
+            <span class="corner-flourish" aria-hidden="true"></span>
+            @if (story.featured) {
+              <span class="card__seal"><app-wax-seal [size]="52" /></span>
+            }
+            <app-story-cover [story]="story" [volume]="i + 1" />
+
+            <div class="card__body" [attr.lang]="story.lang">
+              <p class="overline" [attr.lang]="site.lang">
+                {{ labels.volume }} {{ i + 1 | roman }}
+                @if (mark?.finished) {
+                  <span class="card__read">· {{ labels.finished }}</span>
+                }
+              </p>
+              <h3 class="card__title">{{ story.title }}</h3>
+              @if (story.subtitle) {
+                <p class="card__subtitle">{{ story.subtitle }}</p>
+              }
+              <p class="card__blurb">{{ story.blurb }}</p>
+            </div>
+
+            <div class="card__foot">
+              <span class="card__meta" [class.is-known]="!!detail">
+                @if (detail) {
+                  {{ labels.chapters(detail.chapters) }} · {{ labels.minutes(detail.minutes) }}
+                } @else {
+                  &nbsp;
+                }
+              </span>
+              <span class="card__cta">
+                @if (!mark) {
+                  {{ labels.beginReading }}
+                } @else if (mark.finished) {
+                  {{ labels.readAgain }}
+                } @else {
+                  {{ labels.continueReading }}
+                }
+                <span aria-hidden="true">›</span>
+              </span>
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+</main>
+
+<footer class="colophon">
+  <div class="ornate-divider" aria-hidden="true">❦</div>
+  <p class="overline overline--muted">
+    {{ labels.madeWithCare }} · {{ site.year | roman }}
+  </p>
+</footer>

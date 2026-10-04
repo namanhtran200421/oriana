@@ -1,0 +1,137 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--color-bg);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.625;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+p,
+figure,
+blockquote,
+ol,
+ul {
+  margin: 0;
+}
+
+a {
+  color: var(--color-brass);
+  text-underline-offset: 4px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgb(201 169 98 / 0.32);
+  color: var(--color-fg);
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Above-the-fold reveal, held until fonts arrive (see index.html). Words settle
+// into place like ink drying: opacity and a hair of movement only, both of
+// which the compositor animates without repainting.
+.js .reveal {
+  opacity: 0;
+}
+
+.fonts-ready .reveal {
+  animation: ink-in 1500ms var(--ease-ink) both;
+  animation-delay: calc(var(--d, 0) * 140ms + 60ms);
+}
+
+// Below-the-fold reveal, driven by the [appReveal] directive.
+.js .reveal-on-scroll {
+  opacity: 0;
+  transform: translate3d(0, 1rem, 0);
+  transition:
+    opacity 1200ms var(--ease-ink),
+    transform 1400ms var(--ease-ink);
+  transition-delay: calc(var(--d, 0) * 140ms);
+}
+
+.js .reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+  }
+}

@@ -1,0 +1,133 @@
+<header class="bar">
+  <button type="button" class="btn btn--ghost bar__back" (click)="leave()">
+    <app-icon name="arrow-left" />
+    <span class="bar__back-label">{{ labels().library }}</span>
+  </button>
+
+  <p class="bar__title">
+    <span class="overline">{{ labels().volume }} {{ ctx.volume() | roman }}</span>
+    <span class="bar__story">{{ story().title }}</span>
+  </p>
+
+  <div class="bar__tools">
+    <app-music-toggle [lang]="story().lang" />
+    <button
+      type="button"
+      class="btn btn--icon"
+      [disabled]="!ctx.ready()"
+      [attr.aria-label]="labels().contents"
+      (click)="openContents()"
+    >
+      <app-icon name="list" />
+    </button>
+  </div>
+</header>
+
+<main class="stage">
+  <app-book #book (closeRequested)="leave()" />
+
+  <button
+    type="button"
+    class="btn btn--icon stage__turn stage__turn--prev"
+    [disabled]="ctx.spread() === 0"
+    [attr.aria-label]="labels().previousPage"
+    (click)="book.prev()"
+  >
+    <app-icon name="chevron-left" />
+  </button>
+  <button
+    type="button"
+    class="btn btn--icon stage__turn stage__turn--next"
+    [disabled]="ctx.ready() && ctx.spread() === ctx.lastSpread()"
+    [attr.aria-label]="ctx.spread() === 0 ? labels().openHint : labels().nextPage"
+    (click)="book.next()"
+  >
+    <app-icon name="chevron-right" />
+  </button>
+</main>
+
+<footer class="foot">
+  <button
+    type="button"
+    class="btn btn--icon foot__turn"
+    [disabled]="ctx.spread() === 0"
+    [attr.aria-label]="labels().previousPage"
+    (click)="book.prev()"
+  >
+    <app-icon name="chevron-left" />
+  </button>
+
+  <div class="foot__progress">
+    <p class="foot__status" [class.is-inviting]="ctx.spread() === 0">
+      <span class="foot__label">{{ status() }}</span>
+      @if (ctx.spread() === 0) {
+        <span class="foot__hint">{{ labels().turnHint }}</span>
+      }
+    </p>
+    <p class="foot__folio">{{ folio() }}</p>
+    <div class="progress" aria-hidden="true">
+      <span class="progress__fill" [style.transform]="'scaleX(' + ctx.progress() + ')'"></span>
+      @for (tick of ticks(); track $index) {
+        <span class="progress__tick" [style.left.%]="tick * 100"></span>
+      }
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="btn btn--icon foot__turn"
+    [disabled]="ctx.ready() && ctx.spread() === ctx.lastSpread()"
+    [attr.aria-label]="ctx.spread() === 0 ? labels().openHint : labels().nextPage"
+    (click)="book.next()"
+  >
+    <app-icon name="chevron-right" />
+  </button>
+</footer>
+
+<div #measurer class="measurer" aria-hidden="true"></div>
+<article class="sr-only" [innerHTML]="readable()"></article>
+<p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+
+<dialog
+  #contents
+  class="contents-dialog"
+  [attr.aria-label]="labels().contents"
+  (click)="onDialogClick($event)"
+>
+  <div class="contents-dialog__panel ornate-frame">
+    <header class="contents-dialog__head">
+      <p class="overline">{{ labels().contents }}</p>
+      <h2 class="contents-dialog__title">{{ story().title }}</h2>
+      <div class="ornate-divider" aria-hidden="true">✶</div>
+    </header>
+
+    <ol class="contents-dialog__list">
+      @for (entry of entries(); track entry.section) {
+        <li>
+          <button
+            type="button"
+            class="contents-dialog__entry"
+            [attr.aria-current]="entry.current ? 'true' : null"
+            (click)="jump(entry.section)"
+          >
+            <span class="contents-dialog__num" aria-hidden="true">{{ entry.numeral }}</span>
+            <span>{{ entry.title }}</span>
+            @if (entry.folio) {
+              <span class="contents-dialog__leader" aria-hidden="true"></span>
+              <span class="contents-dialog__folio">{{ entry.folio }}</span>
+            }
+          </button>
+        </li>
+      }
+    </ol>
+
+    <button
+      type="button"
+      class="btn btn--icon contents-dialog__close"
+      [attr.aria-label]="labels().close"
+      (click)="contents.close()"
+    >
+      <app-icon name="x" />
+    </button>
+  </div>
+</dialog>

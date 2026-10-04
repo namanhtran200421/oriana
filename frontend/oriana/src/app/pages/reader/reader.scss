@@ -1,0 +1,228 @@
+@use 'mixins' as *;
+
+// The reading desk: a pool of lamplight from above, shadow pooling below.
+:host {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: var(--bar-top) minmax(0, 1fr) var(--bar-bottom);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgb(201 169 98 / 0.08), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% 105%, rgb(0 0 0 / 0.35), transparent 70%),
+    var(--color-bg);
+}
+
+// Chrome recedes while reading and returns when reached for.
+.bar,
+.foot,
+.stage__turn {
+  transition: opacity 600ms var(--ease-out);
+}
+
+:host(.is-open) {
+  .bar:not(:hover, :focus-within),
+  .foot:not(:hover, :focus-within) {
+    opacity: 0.6;
+  }
+}
+
+.bar {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 0.75rem;
+
+  @include md {
+    padding: 0 1.5rem;
+  }
+}
+
+.bar__back {
+  justify-self: start;
+}
+
+.bar__back-label {
+  display: none;
+
+  @include md {
+    display: inline;
+  }
+}
+
+.bar__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.bar__story {
+  display: none;
+  max-width: 50vw;
+  overflow: hidden;
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-style: italic;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @include md {
+    display: block;
+  }
+}
+
+.bar__tools {
+  display: flex;
+  gap: 0.5rem;
+  justify-self: end;
+}
+
+.stage {
+  position: relative;
+  min-height: 0;
+}
+
+// Brass medallions either side of the book on larger screens.
+.stage__turn {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: none;
+  translate: 0 -50%;
+
+  @include md {
+    display: inline-flex;
+  }
+}
+
+.stage__turn--prev {
+  left: max(0.75rem, calc(50% - var(--book-w) / 2 - 4.5rem));
+}
+
+.stage__turn--next {
+  right: max(0.75rem, calc(50% - var(--book-w) / 2 - 4.5rem));
+}
+
+.foot {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.75rem env(safe-area-inset-bottom);
+
+  @include md {
+    padding: 0 1.5rem;
+  }
+}
+
+.foot__turn {
+  @include md {
+    display: none;
+  }
+}
+
+.foot__progress {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'status folio'
+    'rail rail';
+  align-items: baseline;
+  gap: 0.6rem 1rem;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.foot__status {
+  grid-area: status;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.foot__label {
+  @include label(0.625rem);
+  overflow: hidden;
+  color: var(--color-muted-fg);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.foot__hint {
+  display: none;
+  color: var(--color-muted-fg);
+  font-size: 0.875rem;
+  font-style: italic;
+
+  @include md {
+    display: block;
+  }
+}
+
+// Before the cover is opened, the label glows gently like a held breath.
+.is-inviting .foot__label {
+  color: var(--color-brass);
+  animation: glow 2800ms var(--ease-out) infinite;
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.foot__folio {
+  grid-area: folio;
+  color: var(--color-muted-fg);
+  font-size: 0.9375rem;
+  font-variant-numeric: oldstyle-nums;
+}
+
+.progress {
+  position: relative;
+  grid-area: rail;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.progress__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-brass);
+  transform-origin: left center;
+  transition: transform 900ms var(--ease-out);
+}
+
+.progress__tick {
+  position: absolute;
+  top: -3px;
+  width: 1px;
+  height: 7px;
+  background: var(--color-muted-fg);
+  opacity: 0.7;
+}
+
+// Off-screen typesetting table used by the paginator.
+.measurer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  contain: strict;
+}

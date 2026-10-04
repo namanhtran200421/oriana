@@ -1,0 +1,241 @@
+// Stacking, bottom to top: shadow & page block (0) · still pages (1) ·
+// cast shadows (2) · the turning leaf (4).
+
+:host {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.book {
+  position: relative;
+  width: var(--page-w);
+  height: var(--page-h);
+  perspective: calc(var(--page-w) * 3.4);
+  perspective-origin: 50% 45%;
+  cursor: pointer;
+}
+
+.book--spread {
+  width: calc(var(--page-w) * 2);
+}
+
+// Closed, the cover alone sits centred; it slides left as the book opens.
+.book--spread.book--closed {
+  transform: translateX(calc(var(--page-w) * -0.5));
+}
+
+.book__shadow {
+  position: absolute;
+  top: 1.5%;
+  bottom: -0.5%;
+  z-index: 0;
+  border-radius: 6px;
+  box-shadow:
+    0 34px 60px -16px rgb(0 0 0 / 0.85),
+    0 12px 24px -10px rgb(0 0 0 / 0.6);
+  transition: opacity 700ms var(--ease-out);
+}
+
+.book--spread .book__shadow--left {
+  left: 1%;
+  width: 49%;
+}
+
+.book--spread .book__shadow--right {
+  left: 50%;
+  width: 49%;
+}
+
+.book--single .book__shadow--left {
+  display: none;
+}
+
+.book--single .book__shadow--right {
+  inset-inline: 1%;
+}
+
+.book--closed .book__shadow--left {
+  opacity: 0;
+}
+
+// The page block: leaves already read on the left, still to come on the right.
+.book__edges {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  z-index: 0;
+  width: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(232 223 212 / 0.22) 0 1px,
+    rgb(28 23 20 / 0.9) 1px 2px
+  );
+  transition:
+    transform 900ms var(--ease-out),
+    opacity 700ms var(--ease-out);
+}
+
+.book__edges--left {
+  right: 100%;
+  border-radius: 3px 0 0 3px;
+  transform: scaleX(calc(0.2 + 0.8 * var(--read, 0)));
+  transform-origin: right center;
+}
+
+.book__edges--right {
+  left: 100%;
+  border-radius: 0 3px 3px 0;
+  transform: scaleX(calc(1 - 0.8 * var(--read, 0)));
+  transform-origin: left center;
+}
+
+.book--closed .book__edges--left,
+.book--single .book__edges--left {
+  opacity: 0;
+}
+
+// A silk ribbon marker, slipping out from between the pages.
+.book__ribbon {
+  position: absolute;
+  bottom: -22px;
+  left: calc(50% + var(--page-w) * 0.1);
+  z-index: 0;
+  width: 11px;
+  height: 48px;
+  background: linear-gradient(90deg, #5e1622, #8b2635 40%, #a23949 55%, #6d1c28);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
+}
+
+.book--single .book__ribbon {
+  left: auto;
+  right: 16%;
+}
+
+.book__slot {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  height: 100%;
+}
+
+.book--spread .book__slot--left {
+  left: 0;
+  width: 50%;
+}
+
+.book--spread .book__slot--right {
+  left: 50%;
+  width: 50%;
+}
+
+.book--single .book__slot--right {
+  left: 0;
+  width: 100%;
+}
+
+.book__cast {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.book--spread .book__cast--left {
+  left: 0;
+  width: 50%;
+  background: linear-gradient(270deg, rgb(0 0 0 / 0.6), rgb(0 0 0 / 0.18) 35%, transparent 75%);
+  transform-origin: right center;
+}
+
+.book--spread .book__cast--right,
+.book--single .book__cast--right {
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.6), rgb(0 0 0 / 0.18) 35%, transparent 75%);
+  transform-origin: left center;
+}
+
+.book--spread .book__cast--right {
+  left: 50%;
+  width: 50%;
+}
+
+.book--single .book__cast--right {
+  left: 0;
+  width: 100%;
+}
+
+.book--single .book__cast--left {
+  display: none;
+}
+
+// The turning leaf. Two faces, back to back; only one is ever seen.
+.leaf {
+  position: absolute;
+  top: 0;
+  z-index: 4;
+  height: 100%;
+  transform-style: preserve-3d;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.leaf--active {
+  visibility: visible;
+  will-change: transform;
+}
+
+.book--spread .leaf {
+  left: 50%;
+  width: 50%;
+  transform-origin: left center;
+}
+
+.book--spread .leaf--backward {
+  left: 0;
+  transform-origin: right center;
+}
+
+.book--single .leaf {
+  left: 0;
+  width: 100%;
+  transform-origin: left center;
+}
+
+.leaf__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.leaf__face--back {
+  transform: rotateY(180deg);
+}
+
+// As a page stands up from the desk it turns away from the lamp.
+.leaf__shade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.15), rgb(0 0 0 / 0.6));
+}
+
+.leaf__face[data-side='verso'] .leaf__shade {
+  background: linear-gradient(270deg, rgb(0 0 0 / 0.15), rgb(0 0 0 / 0.6));
+}
+
+.paper {
+  position: absolute;
+  inset: 0;
+  background: var(--page-bg);
+}

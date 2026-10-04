@@ -1,0 +1,266 @@
+@use 'mixins' as *;
+
+// Book typography for the paginated flow. Chapter markup is generated from the
+// manuscript and inserted with innerHTML, so it is styled globally rather than
+// through component encapsulation.
+//
+// Pagination trick: `.flow` is exactly one page wide and tall, and every
+// overflowing column becomes the next page, laid out to the right. A page shows
+// column N by translating the flow left by N * (--flow-w + --flow-gap).
+
+.flow {
+  width: var(--flow-w);
+  height: var(--flow-h);
+  column-width: var(--flow-w);
+  column-gap: var(--flow-gap);
+  column-fill: auto;
+  font-family: var(--font-body);
+  font-size: var(--reader-font);
+  line-height: var(--reader-leading);
+  color: var(--color-fg);
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-kerning: normal;
+  orphans: 2;
+  widows: 2;
+
+  p {
+    text-indent: 1.5em;
+  }
+
+  p.lead,
+  :is(header, h3, hr, figure, blockquote) + p {
+    text-indent: 0;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  h3 {
+    @include label(0.7em);
+    margin: var(--reader-leading) 0 calc(var(--reader-leading) * 0.5);
+    color: var(--color-brass);
+    text-align: center;
+    line-height: var(--reader-leading);
+    break-after: avoid;
+  }
+}
+
+.flow-end {
+  height: 0;
+}
+
+// Chapter opening: sunk below the top margin like a printed novel.
+.chapter-head {
+  padding-top: calc(var(--flow-h) * 0.14);
+  margin-bottom: calc(var(--reader-leading) * 1.25);
+  text-align: center;
+  hyphens: manual;
+  break-inside: avoid;
+  break-after: avoid;
+
+  .ornate-divider {
+    max-width: 9rem;
+  }
+}
+
+.chapter-head__label {
+  @include label(calc(var(--reader-font) * 0.62));
+  margin-bottom: calc(var(--reader-leading) * 0.4);
+  color: var(--color-brass);
+  text-indent: 0;
+}
+
+.chapter-head__title {
+  margin-bottom: calc(var(--reader-leading) * 0.7);
+  font-size: calc(var(--reader-font) * 1.85);
+  line-height: 1.15;
+  text-align: center;
+}
+
+// Illuminated initial, three lines deep.
+.flow p.lead::first-letter {
+  float: left;
+  margin: 0.06em 0.12em 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(var(--reader-leading) * 3.05);
+  line-height: 0.8;
+  color: var(--color-brass);
+  text-shadow: 2px 2px 4px rgb(0 0 0 / 0.3);
+}
+
+@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+  .flow p.lead::first-letter {
+    float: none;
+    margin: 0 0.14em 0 0;
+    font-size: inherit;
+    line-height: inherit;
+    -webkit-initial-letter: 3;
+    initial-letter: 3;
+  }
+}
+
+hr.scene-break {
+  height: auto;
+  margin: calc(var(--reader-leading) * 0.5) 0;
+  border: 0;
+  overflow: visible;
+  text-align: center;
+  break-inside: avoid;
+  break-after: avoid;
+
+  &::before {
+    content: '\2766\FE0E';
+    display: block;
+    color: var(--color-brass);
+    font-family: var(--font-glyph);
+    font-size: 0.95em;
+    line-height: var(--reader-leading);
+  }
+}
+
+// Letters and verse: kept in their own voice.
+.flow blockquote {
+  margin: calc(var(--reader-leading) * 0.5) 0 calc(var(--reader-leading) * 0.5) 0.9em;
+  padding-left: 1em;
+  border-left: 1px solid rgb(201 169 98 / 0.45);
+  color: color-mix(in srgb, var(--color-fg) 88%, var(--color-brass));
+  font-style: italic;
+  text-align: left;
+  hyphens: manual;
+
+  p {
+    text-indent: 0;
+  }
+
+  p + p {
+    margin-top: calc(var(--reader-leading) * 0.5);
+  }
+
+  em {
+    font-style: normal;
+  }
+}
+
+// Tipped-in plates: arch-topped, aged until looked at.
+.flow figure.plate {
+  margin: calc(var(--reader-leading) * 0.5) 0;
+  text-align: center;
+  break-inside: avoid;
+
+  img {
+    width: auto;
+    max-width: 100%;
+    height: calc(var(--flow-h) * 0.5);
+    aspect-ratio: 4 / 5;
+    margin-inline: auto;
+    object-fit: cover;
+    border-radius: var(--radius-arch);
+    box-shadow:
+      0 0 0 4px var(--page-bg),
+      0 0 0 5px rgb(201 169 98 / 0.45);
+    filter: var(--filter-sepia);
+    transition: filter var(--dur-dramatic) var(--ease-out);
+    -webkit-user-drag: none;
+  }
+
+  &:hover img {
+    filter: none;
+  }
+
+  figcaption {
+    margin-top: calc(var(--reader-leading) * 0.5);
+    color: var(--color-muted-fg);
+    font-size: 0.85em;
+    font-style: italic;
+    line-height: var(--reader-leading);
+    text-align: center;
+  }
+}
+
+// Front matter inside the flow (the contents page).
+.matter-head {
+  padding-top: calc(var(--flow-h) * 0.1);
+  margin-bottom: calc(var(--reader-leading) * 1.25);
+  text-align: center;
+  break-inside: avoid;
+
+  .ornate-divider {
+    max-width: 8rem;
+  }
+}
+
+.matter-head__label {
+  @include label(calc(var(--reader-font) * 0.72));
+  margin-bottom: calc(var(--reader-leading) * 0.6);
+  color: var(--color-brass);
+}
+
+.toc {
+  padding: 0;
+  list-style: none;
+  text-align: left;
+
+  li {
+    break-inside: avoid;
+  }
+}
+
+.toc__entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+  width: 100%;
+  padding: calc(var(--reader-leading) * 0.2) 0;
+  border: 0;
+  background: none;
+  color: var(--color-fg);
+  font-family: var(--font-heading);
+  font-size: 1.12em;
+  line-height: var(--reader-leading);
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease-out);
+
+  &:hover {
+    color: var(--color-brass);
+  }
+
+  &:hover .toc__leader {
+    background: rgb(201 169 98 / 0.6);
+  }
+}
+
+.toc__num {
+  @include label(0.56em);
+  flex: none;
+  min-width: 2.8em;
+  color: var(--color-brass);
+}
+
+.toc__leader {
+  flex: 1;
+  min-width: 1.5em;
+  height: 1px;
+  background: var(--color-border);
+  transform: translateY(-0.3em);
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+.toc__folio {
+  flex: none;
+  color: var(--color-muted-fg);
+  font-family: var(--font-body);
+  font-size: 0.9em;
+  font-variant-numeric: oldstyle-nums;
+}

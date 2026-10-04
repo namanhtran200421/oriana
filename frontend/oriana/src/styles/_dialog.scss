@@ -1,0 +1,141 @@
+@use 'mixins' as *;
+
+// The reader's contents index. A native <dialog> gives focus trapping and Esc
+// for free; @starting-style lets it fade in and out like the rest of the house.
+.contents-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: min(42rem, calc(100dvh - 2rem));
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg-alt);
+  color: var(--color-fg);
+  overflow: visible;
+  opacity: 0;
+  transform: scale(0.97);
+  transition:
+    opacity 500ms var(--ease-out),
+    transform 600ms var(--ease-out),
+    overlay 600ms allow-discrete,
+    display 600ms allow-discrete;
+
+  &[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  &::backdrop {
+    background: rgb(18 14 12 / 0);
+    transition:
+      background-color 500ms var(--ease-out),
+      overlay 600ms allow-discrete,
+      display 600ms allow-discrete;
+  }
+
+  &[open]::backdrop {
+    background: rgb(18 14 12 / 0.8);
+  }
+}
+
+@starting-style {
+  .contents-dialog[open] {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  .contents-dialog[open]::backdrop {
+    background: rgb(18 14 12 / 0);
+  }
+}
+
+.contents-dialog__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+  padding: 2.75rem 1.25rem 1.5rem;
+
+  @include md {
+    padding: 3rem 2.5rem 2rem;
+  }
+}
+
+.contents-dialog__head {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.contents-dialog__title {
+  font-size: 2rem;
+}
+
+.contents-dialog__list {
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.contents-dialog__entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.55rem 0.75rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--color-fg);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+
+  &:hover {
+    background: rgb(201 169 98 / 0.08);
+    color: var(--color-brass);
+  }
+
+  &[aria-current='true'] {
+    color: var(--color-brass);
+    font-style: italic;
+  }
+}
+
+.contents-dialog__num {
+  @include label(0.625rem);
+  flex: none;
+  min-width: 2.75rem;
+  color: var(--color-brass);
+}
+
+.contents-dialog__leader {
+  flex: 1;
+  min-width: 1rem;
+  height: 1px;
+  background: var(--color-border);
+  transform: translateY(-0.3em);
+}
+
+.contents-dialog__folio {
+  flex: none;
+  color: var(--color-muted-fg);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-variant-numeric: oldstyle-nums;
+}
+
+.contents-dialog__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}

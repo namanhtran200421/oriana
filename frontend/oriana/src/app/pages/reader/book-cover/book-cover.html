@@ -1,0 +1,13 @@
+@let story = ctx.story();
+<div class="cover__grain"></div>
+<div class="cover__frame">
+  <p class="cover__volume">{{ ctx.labels().volume }} {{ ctx.volume() | roman }}</p>
+  @if (story.cover; as src) {
+    <img class="cover__plate sepia" [src]="src" alt="" draggable="false" />
+  } @else {
+    <span class="cover__emblem">❦</span>
+  }
+  <h2 class="cover__title">{{ story.title }}</h2>
+  <span class="cover__rule"></span>
+  <p class="cover__author">{{ story.author }}</p>
+</div>

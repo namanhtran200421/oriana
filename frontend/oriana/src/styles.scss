@@ -1,0 +1,9 @@
+// Global design system. Component styles `@use 'mixins'` for shared helpers.
+@use 'styles/tokens';
+@use 'styles/base';
+@use 'styles/atmosphere';
+@use 'styles/ornaments';
+@use 'styles/buttons';
+@use 'styles/prose';
+@use 'styles/dialog';
+@use 'styles/transitions';

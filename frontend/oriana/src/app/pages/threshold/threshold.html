@@ -1,0 +1,30 @@
+<main class="threshold" [class.is-opening]="opening()">
+  <div class="threshold__glow" aria-hidden="true"></div>
+  <app-music-toggle class="threshold__music reveal" style="--d: 8" />
+
+  <section class="threshold__frame ornate-frame" aria-labelledby="threshold-title">
+    <div class="threshold__panel" aria-hidden="true"></div>
+
+    <div class="threshold__words">
+      <p class="overline reveal" style="--d: 0">{{ labels.exLibris }} · {{ site.year | roman }}</p>
+      <h1 id="threshold-title" class="threshold__title reveal" style="--d: 1">{{ site.title }}</h1>
+      <p class="threshold__tagline reveal" style="--d: 2">{{ site.tagline }}</p>
+      <div class="ornate-divider reveal" style="--d: 3" aria-hidden="true">❦</div>
+    </div>
+
+    <button
+      type="button"
+      class="threshold__seal reveal"
+      style="--d: 5"
+      [attr.aria-label]="labels.openTheSeal"
+      [attr.aria-disabled]="opening()"
+      (click)="breakSeal()"
+    >
+      <span class="threshold__mount">
+        <span class="threshold__ring" aria-hidden="true"></span>
+        <app-wax-seal [size]="sealSize" [monogram]="site.monogram" [broken]="opening()" />
+      </span>
+      <span class="threshold__cta overline">{{ labels.openMe }}</span>
+    </button>
+  </section>
+</main>

@@ -1,0 +1,42 @@
+<svg class="seal__defs" width="0" height="0" focusable="false">
+  <defs>
+    <radialGradient [attr.id]="id + '-wax'" cx="38%" cy="30%" r="78%">
+      <stop offset="0" stop-color="#b9485b" />
+      <stop offset="0.45" stop-color="#8b2635" />
+      <stop offset="1" stop-color="#4c101b" />
+    </radialGradient>
+    <radialGradient [attr.id]="id + '-well'" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#7d2030" />
+      <stop offset="1" stop-color="#5c1521" />
+    </radialGradient>
+    <filter [attr.id]="id + '-shadow'" x="-20%" y="-20%" width="140%" height="150%">
+      <feGaussianBlur stdDeviation="3.5" />
+    </filter>
+  </defs>
+</svg>
+
+<ng-template #art>
+  <svg class="seal__art" viewBox="0 0 120 120" focusable="false">
+    <ellipse cx="60" cy="66" rx="52" ry="49" fill="#000" fill-opacity="0.5" [attr.filter]="'url(#' + id + '-shadow)'" />
+    <path [attr.d]="outline" [attr.fill]="'url(#' + id + '-wax)'" />
+    <circle cx="60" cy="60" r="40" [attr.fill]="'url(#' + id + '-well)'" />
+    <circle cx="60" cy="61.3" r="40" fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="1.2" />
+    <circle cx="60" cy="59" r="40" fill="none" stroke="#000" stroke-opacity="0.38" stroke-width="1.6" />
+    <circle cx="60" cy="60" r="33.5" fill="none" stroke="#000" stroke-opacity="0.22" stroke-width="0.8" />
+    @if (monogram(); as letter) {
+      <text class="seal__mark seal__mark--light" x="60.9" y="61.9">{{ letter }}</text>
+      <text class="seal__mark" x="60" y="61">{{ letter }}</text>
+    } @else {
+      <path class="seal__mark seal__mark--light" transform="translate(42.9 42.9) scale(1.5)" [attr.d]="star" />
+      <path class="seal__mark" transform="translate(42 42) scale(1.5)" [attr.d]="star" />
+    }
+    <ellipse cx="43" cy="35" rx="15" ry="7" fill="#fff" fill-opacity="0.1" transform="rotate(-32 43 35)" />
+  </svg>
+</ng-template>
+
+<span class="seal__whole"><ng-container [ngTemplateOutlet]="art" /></span>
+@if (broken()) {
+  <span class="seal__burst"></span>
+  <span class="seal__half seal__half--left"><ng-container [ngTemplateOutlet]="art" /></span>
+  <span class="seal__half seal__half--right"><ng-container [ngTemplateOutlet]="art" /></span>
+}

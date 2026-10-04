@@ -1,0 +1,69 @@
+<div
+  #bookEl
+  class="book"
+  aria-hidden="true"
+  [class.book--spread]="spreadMode()"
+  [class.book--single]="!spreadMode()"
+  [class.book--closed]="closed()"
+  [style.--read]="ctx.progress()"
+>
+  <div class="book__shadow book__shadow--left"></div>
+  <div class="book__shadow book__shadow--right"></div>
+  <div class="book__edges book__edges--left"></div>
+  <div class="book__edges book__edges--right"></div>
+  <div class="book__ribbon"></div>
+
+  @if (spreadMode()) {
+    <div class="book__slot book__slot--left">
+      <ng-container
+        [ngTemplateOutlet]="face"
+        [ngTemplateOutletContext]="{ $implicit: view().left, side: 'verso', named: false }"
+      />
+    </div>
+  }
+  <div class="book__slot book__slot--right">
+    <ng-container
+      [ngTemplateOutlet]="face"
+      [ngTemplateOutletContext]="{ $implicit: view().right, side: 'recto', named: closed() && !turn() }"
+    />
+  </div>
+
+  <div #castLeft class="book__cast book__cast--left"></div>
+  <div #castRight class="book__cast book__cast--right"></div>
+
+  <div
+    #leafEl
+    class="leaf"
+    [class.leaf--active]="!!turn()"
+    [class.leaf--backward]="spreadMode() && leaf().dir < 0"
+  >
+    <div #frontEl class="leaf__face leaf__face--front" [attr.data-side]="leaf().frontSide">
+      <ng-container
+        [ngTemplateOutlet]="face"
+        [ngTemplateOutletContext]="{ $implicit: leaf().front, side: leaf().frontSide, named: false }"
+      />
+      <div #frontShade class="leaf__shade"></div>
+    </div>
+    <div #backEl class="leaf__face leaf__face--back" [attr.data-side]="leaf().backSide">
+      <ng-container
+        [ngTemplateOutlet]="face"
+        [ngTemplateOutletContext]="{ $implicit: leaf().back, side: leaf().backSide, named: false }"
+      />
+      <div #backShade class="leaf__shade"></div>
+    </div>
+  </div>
+</div>
+
+<ng-template #face let-face let-side="side" let-named="named">
+  @switch (face.type) {
+    @case ('cover') {
+      <app-book-cover [named]="named" />
+    }
+    @case ('page') {
+      <app-book-page [page]="face.page" [side]="side" />
+    }
+    @case ('paper') {
+      <div class="paper" [attr.data-side]="side"></div>
+    }
+  }
+</ng-template>

@@ -1,0 +1,45 @@
+// Shared helpers for component styles: `@use 'mixins' as *;`
+
+$bp-md: 768px;
+$bp-lg: 1024px;
+
+@mixin md {
+  @media (min-width: $bp-md) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (min-width: $bp-lg) {
+    @content;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+/// Cinzel overline: engraved, uppercase, widely tracked.
+@mixin label($size: 0.6875rem) {
+  font-family: var(--font-display);
+  font-size: $size;
+  font-weight: var(--display-weight);
+  letter-spacing: var(--tracking-label);
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+@mixin engraved {
+  text-shadow: var(--text-engraved);
+}
+
+/// Brass foil stamped into leather.
+@mixin brass-foil {
+  background: var(--gradient-brass);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.55));
+}

@@ -1,0 +1,31 @@
+// Route changes: the old page recedes as the new one settles in, a slow
+// cross-dissolve with the faintest change of depth. Opacity and transform only,
+// so the full-screen snapshots stay on the GPU. Named elements (a story's
+// cover, the music toggle) glide between their places on top.
+
+::view-transition-old(root) {
+  animation: vt-recede 750ms var(--ease-out) both;
+}
+
+::view-transition-new(root) {
+  animation: vt-settle 1100ms var(--ease-ink) 150ms both;
+}
+
+::view-transition-group(*) {
+  animation-duration: 1000ms;
+  animation-timing-function: var(--ease-ink);
+}
+
+@keyframes vt-recede {
+  to {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes vt-settle {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}

@@ -1,0 +1,76 @@
+// Design tokens: "Library at Night".
+// CSS custom properties are the single source of truth so components, inline
+// SVG and runtime-generated book pages all read the same values.
+
+:root {
+  // Foundation
+  --color-bg: #1c1714; // Deep Mahogany
+  --color-bg-alt: #251e19; // Aged Oak
+  --color-fg: #e8dfd4; // Antique Parchment
+  --color-muted: #3d332b; // Worn Leather
+  --color-muted-fg: #9c8b7a; // Faded Ink
+  --color-border: #4a3f35; // Wood Grain
+
+  // Accents
+  --color-brass: #c9a962; // Polished Brass: the interactive colour
+  --color-brass-light: #d4b872;
+  --color-brass-dark: #b8953f;
+  --color-crimson: #8b2635; // Library Crimson: wax & rare emphasis
+  --color-on-brass: #1c1714;
+
+  // Book materials
+  --page-bg: #251e19;
+  --leather-crimson: #5b1a25;
+  --leather-mahogany: #3b2419;
+  --leather-oak: #33291f;
+
+  --gradient-brass: linear-gradient(
+    180deg,
+    var(--color-brass-light) 0%,
+    var(--color-brass) 50%,
+    var(--color-brass-dark) 100%
+  );
+
+  // Typography
+  --font-heading: 'Cormorant Garamond', 'Cormorant', Garamond, 'Times New Roman', serif;
+  --font-body: 'Crimson Pro', 'Crimson Text', Georgia, serif;
+  --font-display: 'Cinzel', 'Trajan Pro', 'Cormorant Garamond', serif;
+  --font-glyph: 'Cormorant Garamond', 'Apple Symbols', 'Segoe UI Symbol', serif;
+  --display-weight: 500;
+  --tracking-label: 0.28em;
+
+  // Shape
+  --radius: 4px;
+  --radius-arch: 40% 40% 0 0 / 20% 20% 0 0;
+
+  // Depth
+  --shadow-lift: 0 8px 24px rgb(0 0 0 / 0.3);
+  --shadow-engraved: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.2),
+    0 2px 8px rgb(0 0 0 / 0.3);
+  --shadow-brass-glow: 0 4px 12px rgb(201 169 98 / 0.3);
+  --shadow-wax: inset 0 2px 4px rgb(255 255 255 / 0.2), inset 0 -2px 4px rgb(0 0 0 / 0.3),
+    0 4px 8px rgb(0 0 0 / 0.4);
+  --text-engraved: 1px 1px 1px rgb(0 0 0 / 0.4), -1px -1px 1px rgb(255 255 255 / 0.1);
+  --filter-sepia: sepia(0.6) contrast(0.95) brightness(0.9);
+
+  // Motion: dignified, always decelerating, never bouncing
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-ink: cubic-bezier(0.16, 0.7, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 500ms;
+  --dur-dramatic: 700ms;
+
+  // Layout
+  --content-max: 72rem;
+  --content-narrow: 56rem;
+  --gutter: 1rem;
+}
+
+// Cinzel ships no Vietnamese glyphs. Engrave labels in Cormorant capitals
+// instead so diacritics never fall back mid-word.
+:lang(vi) {
+  --font-display: 'Cormorant Garamond', 'Cormorant', Garamond, serif;
+  --display-weight: 600;
+  --tracking-label: 0.2em;
+}

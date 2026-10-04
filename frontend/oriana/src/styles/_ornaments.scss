@@ -1,0 +1,160 @@
+@use 'mixins' as *;
+
+// Overline label, "Volume I" and friends.
+.overline {
+  @include label;
+  color: var(--color-brass);
+}
+
+.overline--muted {
+  color: var(--color-muted-fg);
+}
+
+// Label flanked by short brass rules: ── PROCLAMATION ──
+.overline--flanked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+
+  &::before,
+  &::after {
+    content: '';
+    width: 2.5rem;
+    height: 1px;
+    background: var(--color-brass);
+    opacity: 0.7;
+  }
+}
+
+// Gradient rule with a centred glyph. The glyph is the element's own text,
+// so the markup reads <div class="ornate-divider" aria-hidden="true">❦</div>.
+.ornate-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.85em;
+  width: 100%;
+  max-width: 16rem;
+  margin-inline: auto;
+  color: var(--color-brass);
+  font-family: var(--font-glyph);
+  font-size: 0.9rem;
+  line-height: 1;
+  font-variant-emoji: text;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+  }
+
+  &::before {
+    background: linear-gradient(90deg, transparent, var(--color-border) 40%, var(--color-brass));
+  }
+
+  &::after {
+    background: linear-gradient(90deg, var(--color-brass), var(--color-border) 60%, transparent);
+  }
+}
+
+.ornate-divider--wide {
+  max-width: 100%;
+}
+
+// Large brass corner brackets: certificates, the threshold frame.
+.ornate-frame {
+  --corner: 24px;
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: var(--corner);
+    height: var(--corner);
+    border: 2px solid var(--color-brass);
+    pointer-events: none;
+  }
+
+  &::before {
+    top: -1px;
+    left: -1px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  &::after {
+    right: -1px;
+    bottom: -1px;
+    border-top: none;
+    border-left: none;
+  }
+
+  @include md {
+    --corner: 40px;
+  }
+}
+
+// Subtle 24px brackets for cards; brighten when the card is hovered.
+.corner-flourish {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--color-brass);
+    opacity: 0.6;
+    transition: opacity var(--dur-slow) var(--ease-out);
+  }
+
+  &::before {
+    top: 10px;
+    left: 10px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  &::after {
+    right: 10px;
+    bottom: 10px;
+    border-top: none;
+    border-left: none;
+  }
+}
+
+.arch-top {
+  border-radius: var(--radius-arch);
+}
+
+// Aged photograph that blooms into colour when its card (or itself) is hovered.
+.sepia {
+  filter: var(--filter-sepia);
+  transition:
+    filter var(--dur-dramatic) var(--ease-out),
+    transform var(--dur-dramatic) var(--ease-out);
+}
+
+:is(a, .card, figure):hover .sepia,
+.sepia:hover {
+  filter: none;
+}
+
+.drop-cap::first-letter {
+  float: left;
+  margin: 0.04em 0.16em 0 0;
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  line-height: 0.8;
+  color: var(--color-brass);
+  text-shadow: 2px 2px 4px rgb(0 0 0 / 0.3);
+}
+
+.engraved {
+  @include engraved;
+}
