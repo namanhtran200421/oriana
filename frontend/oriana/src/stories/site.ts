@@ -11,6 +11,7 @@ export const SITE: SiteConfig = {
   author: 'Nam Anh',
   title: "Oriana",
   tagline: 'Stories of Us',
+  place: 'Melbourne',
   year: 2026,
   preface: {
     label: 'Just a Note',

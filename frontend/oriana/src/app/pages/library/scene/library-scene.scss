@@ -1,0 +1,104 @@
+// Fixed behind the page. Layers read --mx/--my (the lantern, -1 to 1), --scroll
+// and --fade from the host, and move by their depth: transforms and opacity
+// only, so the compositor does the work.
+:host {
+  --mx: 0;
+  --my: 0;
+  --scroll: 0px;
+  --fade: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.scene__hall {
+  position: absolute;
+  inset: -5%;
+  opacity: calc(0.95 - var(--fade) * 0.5);
+  translate: calc(var(--mx) * -16px) calc(var(--my) * -10px - var(--scroll) * 0.05);
+  // Scrolling is walking in: the window draws nearer as the hero passes.
+  scale: calc(1 + var(--fade) * 0.14);
+  transform-origin: 50% 36%;
+  will-change: translate, scale, opacity;
+
+  // Centuries on every surface: damp stains, grime in the grain, dust on the
+  // glass. Static, so it is painted once with the rest of the hall.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      var(--tex-mottle) 0 0 / 640px,
+      radial-gradient(ellipse at 50% 40%, transparent 35%, rgb(8 5 3 / 0.55) 100%);
+    // The window is kept clear: the stains are the shelves' and the walls'.
+    mask-image: linear-gradient(90deg, #000 30%, transparent 38%, transparent 62%, #000 70%);
+  }
+}
+
+.hall {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hall--beams {
+  mix-blend-mode: screen;
+  animation: beams 11s ease-in-out infinite;
+}
+
+.star {
+  fill: #f3ecd6;
+  animation: star 4.5s ease-in-out infinite;
+}
+
+// The lantern: wherever the hand is, gilt and leather wake from the dark.
+.scene__lantern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56rem;
+  height: 56rem;
+  margin: -28rem 0 0 -28rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    rgb(255 224 178 / 0.36),
+    rgb(255 204 140 / 0.12) 42%,
+    transparent
+  );
+  opacity: calc(1 - var(--fade) * 0.4);
+  mix-blend-mode: color-dodge;
+  transform: translate3d(50vw, 30vh, 0);
+  will-change: transform;
+}
+
+.scene__motes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes beams {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes star {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}

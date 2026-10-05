@@ -1,0 +1,157 @@
+<div class="room" [class.is-ready]="ready()" [class.is-leaving]="leaving()" aria-hidden="true">
+  <canvas #canvas class="room__canvas"></canvas>
+  <div class="room__veil"></div>
+</div>
+
+<!-- The scroll track: its length is the length of the walk through the room,
+     with the resting places marked so the page settles on them. -->
+<div class="journey">
+  @for (stop of stops; track stop.key) {
+    <span class="journey__stop" [style.top.px]="stop.at * travel()"></span>
+  }
+</div>
+
+<nav class="rail" [class.is-ready]="ready()" [attr.aria-label]="labels.journey">
+  <span class="rail__track" aria-hidden="true"><span class="rail__fill"></span></span>
+  @for (stop of stops; track stop.key) {
+    <button
+      type="button"
+      class="rail__stop"
+      [class.is-here]="here() === stop.key"
+      [attr.aria-current]="here() === stop.key ? 'step' : null"
+      (click)="goTo(stop.at)"
+    >
+      <span class="rail__label">{{ stop.label }}</span>
+      <span class="rail__dot" aria-hidden="true"></span>
+    </button>
+  }
+</nav>
+
+<section class="moment moment--title" aria-labelledby="library-title">
+  <p class="overline reveal" style="--d: 0">{{ labels.justForYou }}</p>
+  <h1 id="library-title" class="moment__name reveal" style="--d: 1">
+    <app-ink-text [text]="site.title" />
+  </h1>
+  <p class="moment__tagline reveal" style="--d: 5">{{ site.tagline }}</p>
+  <div class="moment__foot" aria-hidden="true">
+    @if (site.place) {
+      <span class="reveal" style="--d: 6">{{ site.place }} · {{ site.year | roman }}</span>
+    }
+    @if (ready()) {
+      <span class="moment__cue"></span>
+    } @else {
+      <span class="moment__loading" [style.--done]="built()">
+        <span class="moment__loading-label">{{ labels.lightingTheLamp }}</span>
+      </span>
+    }
+    <span class="reveal" style="--d: 7">{{ labels.scrollToEnter }}</span>
+  </div>
+</section>
+
+<!-- The note on the desk, for those who read with their ears. -->
+<section class="sr-only" aria-labelledby="note-title">
+  <h2 id="note-title">{{ site.preface.heading }}</h2>
+  @for (paragraph of site.preface.paragraphs; track $index) {
+    <p>{{ paragraph }}</p>
+  }
+  <p>— {{ site.preface.signature }}</p>
+</section>
+
+<section
+  class="moment moment--shelf"
+  aria-labelledby="shelf-title"
+  [attr.inert]="atShelf() ? null : ''"
+>
+  <header class="moment__head">
+    <p class="overline">{{ labels.theShelf }}</p>
+    <h2 id="shelf-title" class="moment__heading">{{ labels.yourStories }}</h2>
+  </header>
+
+  <footer class="moment__foot moment__foot--shelf">
+    <ul class="plaques">
+      @for (v of volumes(); track v.story.slug) {
+        @let detail = details()[v.story.slug];
+        @let mark = marks()[v.story.slug];
+        <li>
+          <button
+            type="button"
+            class="plaque"
+            [class.is-lit]="hovered() === v.story.slug"
+            [attr.lang]="v.story.lang"
+            (click)="takeDown(v)"
+            (pointerenter)="reachFor(v.story.slug)"
+            (pointerleave)="reachFor(null)"
+            (focus)="reachFor(v.story.slug)"
+            (blur)="reachFor(null)"
+          >
+            <span class="plaque__numeral" [attr.lang]="site.lang"
+              >{{ labels.volume }} {{ v.roman }}</span
+            >
+            <span class="plaque__title">{{ v.story.title }}</span>
+            <span class="plaque__meta" [attr.lang]="site.lang">
+              @if (detail) {
+                {{ labels.chapters(detail.chapters) }} · {{ labels.minutes(detail.minutes) }}
+              }
+              @if (mark?.finished) {
+                · {{ labels.finished }}
+              }
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+    <p class="moment__hint" aria-hidden="true">{{ labels.takeDown }}</p>
+  </footer>
+</section>
+
+<dialog
+  #panel
+  class="panel"
+  [class.is-settled]="settled()"
+  aria-labelledby="panel-title"
+  (cancel)="onPanelCancel($event)"
+  (click)="onPanelClick($event)"
+>
+  @if (held(); as v) {
+    @let mark = marks()[v.story.slug];
+    @let detail = details()[v.story.slug];
+    <div class="panel__card" [attr.lang]="v.story.lang">
+      <p class="overline" [attr.lang]="site.lang">
+        {{ labels.volume }} {{ v.roman }}
+        @if (mark?.finished) {
+          · {{ labels.finished }}
+        }
+      </p>
+      <h2 id="panel-title" class="panel__title">{{ v.story.title }}</h2>
+      @if (v.story.subtitle) {
+        <p class="panel__subtitle">{{ v.story.subtitle }}</p>
+      }
+      <div class="ornate-divider panel__divider" aria-hidden="true">❦</div>
+      <p class="panel__blurb">{{ v.story.blurb }}</p>
+      <p class="panel__facts" [attr.lang]="site.lang">
+        @if (detail) {
+          {{ labels.chapters(detail.chapters) }} · {{ labels.minutes(detail.minutes) }} ·
+        }
+        {{ v.story.author }}
+      </p>
+      @if (mark && !mark.finished) {
+        <p class="panel__mark" [attr.lang]="site.lang">{{ labels.leftOffAt(mark.label) }}</p>
+      }
+      <div class="panel__actions" [attr.lang]="site.lang">
+        <button #readButton type="button" class="btn btn--primary" (click)="readIt()">
+          @if (!mark) {
+            {{ labels.beginReading }}
+          } @else if (mark.finished) {
+            {{ labels.readAgain }}
+          } @else {
+            {{ labels.continueReading }}
+          }
+          <span aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="btn btn--secondary" (click)="putBack()">
+          {{ labels.returnToShelf }}
+        </button>
+      </div>
+    </div>
+  }
+</dialog>

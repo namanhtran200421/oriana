@@ -1,0 +1,336 @@
+@use 'mixins' as *;
+
+// A full-window native <dialog>: focus trapping and Esc come with it, and the
+// top layer lifts the stand above the whole library.
+.viewer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-fg);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  &::backdrop {
+    background: radial-gradient(ellipse at 50% 45%, rgb(28 20 14 / 0), rgb(10 7 5 / 0));
+    backdrop-filter: blur(0);
+    transition:
+      background 900ms var(--ease-out),
+      backdrop-filter 900ms var(--ease-out);
+  }
+
+  &.is-lit::backdrop {
+    background: radial-gradient(ellipse at 50% 45%, rgb(28 20 14 / 0.72), rgb(8 6 4 / 0.94));
+    backdrop-filter: blur(5px);
+  }
+}
+
+.viewer__layout {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  justify-items: center;
+  gap: 1rem;
+  min-height: 100dvh;
+  padding: 1.25rem var(--gutter) 2rem;
+
+  @include md {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: none;
+    align-items: center;
+    gap: clamp(2rem, 5vw, 5rem);
+    max-width: 68rem;
+    margin-inline: auto;
+    padding: 2rem;
+  }
+}
+
+// The stand. Its perspective origin is the camera, which starts aimed at the
+// shelf and comes round to look at the book face on.
+.viewer__stage {
+  --h: min(34dvh, 20rem);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: calc(var(--h) * 1.12);
+  perspective: 1700px;
+
+  @include md {
+    --h: min(64dvh, 30rem);
+    justify-self: end;
+  }
+}
+
+// Slow rays of gilt light behind the book, as if it were something holy.
+.viewer__halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--h) * 2);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(255 210 140 / 0.26), rgb(255 190 110 / 0.07) 42%, transparent 66%),
+    repeating-conic-gradient(rgb(255 220 160 / 0.045) 0 2deg, transparent 2deg 11deg);
+  mask-image: radial-gradient(circle, #000 22%, transparent 66%);
+  opacity: 0;
+  translate: -50% -50%;
+  pointer-events: none;
+  transition: opacity 1400ms var(--ease-out);
+  animation: halo-turn 90s linear infinite;
+
+  .is-lit & {
+    opacity: 1;
+  }
+}
+
+.viewer__floor {
+  position: absolute;
+  bottom: calc(var(--h) * 0.02);
+  left: 50%;
+  width: calc(var(--h) * 0.8);
+  height: calc(var(--h) * 0.08);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.6), transparent);
+  opacity: 0;
+  translate: -50% 0;
+  pointer-events: none;
+  transition: opacity 900ms var(--ease-out);
+
+  .is-settled & {
+    opacity: 1;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The book in three dimensions: boards, spine, page edges gilt at the head.
+// ---------------------------------------------------------------------------
+
+.tome {
+  --leather: var(--leather-crimson);
+  --w: calc(var(--h) / 1.42);
+  --d: calc(var(--h) * 4.4 / 18.6);
+  // The cover is the reader's own, sized by the board it is set on.
+  --page-w: var(--w);
+  --page-h: var(--h);
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.tome[data-binding='mahogany'] {
+  --leather: var(--leather-mahogany);
+}
+
+.tome[data-binding='oak'] {
+  --leather: var(--leather-oak);
+}
+
+.tome__face {
+  position: absolute;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.tome__face--front,
+.tome__face--back {
+  inset: 0;
+  border-radius: 3px 6px 6px 3px;
+}
+
+.tome__face--front {
+  transform: translateZ(calc(var(--d) / 2));
+}
+
+.tome__face--back {
+  transform: rotateY(180deg) translateZ(calc(var(--d) / 2));
+  background:
+    radial-gradient(ellipse at 70% 30%, rgb(255 255 255 / 0.06), transparent 60%),
+    var(--tex-pores) 0 0 / 140px,
+    var(--tex-mottle) 60% 20% / 900px,
+    var(--leather);
+}
+
+.tome__face--spine {
+  top: 0;
+  left: calc((var(--w) - var(--d)) / 2);
+  width: var(--d);
+  height: var(--h);
+  font-size: calc(var(--h) / 18.6);
+  transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+}
+
+.tome__face--fore {
+  top: 1.5%;
+  left: calc((var(--w) - var(--d)) / 2 + 2px);
+  width: calc(var(--d) - 4px);
+  height: 97%;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.25), transparent 20%, transparent 80%, rgb(0 0 0 / 0.25)),
+    linear-gradient(
+      180deg,
+      rgb(120 84 40 / 0.35),
+      transparent 12%,
+      transparent 88%,
+      rgb(120 84 40 / 0.35)
+    ),
+    var(--tex-foxing) 0 0 / 380px,
+    var(--tex-mottle) 0 0 / 300px,
+    repeating-linear-gradient(90deg, #e6dac0 0 1px, #c9b893 1px 2px);
+  transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 4px));
+}
+
+.tome__face--top,
+.tome__face--bottom {
+  top: calc((var(--h) - var(--d)) / 2 + 2px);
+  left: 0;
+  width: calc(var(--w) - 4px);
+  height: calc(var(--d) - 4px);
+}
+
+// Gilt at the head, as fine bindings are.
+.tome__face--top {
+  background:
+    repeating-linear-gradient(180deg, rgb(120 90 30 / 0.35) 0 1px, transparent 1px 3px),
+    var(--tex-tarnish) 0 0 / 300px,
+    linear-gradient(90deg, #7a5d26, #c9a962 45%, #a8863f 70%, #5e4718);
+  transform: rotateX(90deg) translateZ(calc(var(--h) / 2 - 3px));
+}
+
+.tome__face--bottom {
+  background:
+    var(--tex-foxing) 0 0 / 380px,
+    repeating-linear-gradient(180deg, #e6dac0 0 1px, #c9b893 1px 2px);
+  transform: rotateX(-90deg) translateZ(calc(var(--h) / 2 - 3px));
+}
+
+// Turned away from the light, a face darkens.
+.tome__shade {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+// ---------------------------------------------------------------------------
+// The catalogue card beside it.
+// ---------------------------------------------------------------------------
+
+.viewer__details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  max-width: 28rem;
+  text-align: center;
+  opacity: 0;
+  translate: 0 0.75rem;
+  transition:
+    opacity 700ms var(--ease-out),
+    translate 900ms var(--ease-ink);
+
+  @include md {
+    align-items: flex-start;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .is-settled & {
+    opacity: 1;
+    translate: none;
+    transition-delay: 100ms;
+  }
+}
+
+.viewer__muted {
+  color: var(--color-muted-fg);
+}
+
+.viewer__title {
+  font-size: clamp(2rem, 4.5vw, 3.1rem);
+  line-height: 1.05;
+  text-shadow: var(--text-engraved);
+}
+
+.viewer__subtitle {
+  color: var(--color-muted-fg);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-style: italic;
+}
+
+.viewer__divider {
+  max-width: 10rem;
+  margin-block: 0.25rem;
+
+  @include md {
+    margin-inline: 0;
+  }
+}
+
+.viewer__blurb {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-style: italic;
+  line-height: 1.4;
+
+  &::before {
+    content: '“';
+  }
+
+  &::after {
+    content: '”';
+  }
+}
+
+.viewer__facts {
+  color: var(--color-muted-fg);
+  font-size: 0.98rem;
+}
+
+.viewer__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-brass-light);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+.viewer__ribbon {
+  width: 0.55rem;
+  height: 1.25rem;
+  background: linear-gradient(90deg, #5e1622, #a23949 50%, #6d1c28);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+}
+
+.viewer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+
+  @include md {
+    justify-content: flex-start;
+  }
+}
+
+@keyframes halo-turn {
+  to {
+    rotate: 1turn;
+  }
+}

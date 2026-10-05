@@ -28,13 +28,10 @@
   orphans: 2;
   widows: 2;
 
-  p {
-    text-indent: 1.5em;
-  }
-
-  p.lead,
-  :is(header, h3, hr, figure, blockquote) + p {
-    text-indent: 0;
+  // Set as the manuscript is written: no indent, a blank line between
+  // paragraphs, and a line more for every extra blank line in the source.
+  p + p {
+    margin-top: calc(var(--reader-leading) * var(--blank-lines, 1));
   }
 
   em {
@@ -77,7 +74,6 @@
   @include label(calc(var(--reader-font) * 0.62));
   margin-bottom: calc(var(--reader-leading) * 0.4);
   color: var(--color-brass);
-  text-indent: 0;
 }
 
 .chapter-head__title {
@@ -87,32 +83,9 @@
   text-align: center;
 }
 
-// Illuminated initial, three lines deep.
-.flow p.lead::first-letter {
-  float: left;
-  margin: 0.06em 0.12em 0 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: calc(var(--reader-leading) * 3.05);
-  line-height: 0.8;
-  color: var(--color-brass);
-  text-shadow: 2px 2px 4px rgb(0 0 0 / 0.3);
-}
-
-@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
-  .flow p.lead::first-letter {
-    float: none;
-    margin: 0 0.14em 0 0;
-    font-size: inherit;
-    line-height: inherit;
-    -webkit-initial-letter: 3;
-    initial-letter: 3;
-  }
-}
-
 hr.scene-break {
   height: auto;
-  margin: calc(var(--reader-leading) * 0.5) 0;
+  margin: var(--reader-leading) 0;
   border: 0;
   overflow: visible;
   text-align: center;
@@ -131,21 +104,13 @@ hr.scene-break {
 
 // Letters and verse: kept in their own voice.
 .flow blockquote {
-  margin: calc(var(--reader-leading) * 0.5) 0 calc(var(--reader-leading) * 0.5) 0.9em;
+  margin: var(--reader-leading) 0 var(--reader-leading) 0.9em;
   padding-left: 1em;
   border-left: 1px solid rgb(201 169 98 / 0.45);
   color: color-mix(in srgb, var(--color-fg) 88%, var(--color-brass));
   font-style: italic;
   text-align: left;
   hyphens: manual;
-
-  p {
-    text-indent: 0;
-  }
-
-  p + p {
-    margin-top: calc(var(--reader-leading) * 0.5);
-  }
 
   em {
     font-style: normal;

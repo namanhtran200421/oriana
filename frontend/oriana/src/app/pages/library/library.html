@@ -1,4 +1,6 @@
-<header class="masthead">
+<app-cursor />
+
+<header class="masthead" [class.masthead--over]="room()">
   <a class="masthead__brand" routerLink="/">
     <app-wax-seal [size]="40" [monogram]="site.monogram" />
     <span class="overline">{{ site.title }}</span>
@@ -11,88 +13,103 @@
   </div>
 </header>
 
-<main>
-  <section class="hero" aria-labelledby="library-title">
-    <p class="overline reveal" style="--d: 0">{{ labels.justForYou }}</p>
-    <h1 id="library-title" class="hero__title reveal" style="--d: 1">{{ site.title }}</h1>
-    <div class="ornate-divider reveal" style="--d: 2" aria-hidden="true">✶</div>
-  </section>
+@if (room()) {
+  <app-reading-room
+    [stories]="stories"
+    [marks]="marks()"
+    [details]="details()"
+    (read)="read($event)"
+    (failed)="room.set(false)"
+  />
+} @else {
+  <app-library-scene />
 
-  <section class="preface" aria-labelledby="preface-title">
-    <article class="preface__certificate ornate-frame" appReveal>
+  <main>
+    <section class="hero" aria-labelledby="library-title">
+      <div class="hero__frame" aria-hidden="true">
+        @if (site.place) {
+          <span class="hero__meta hero__meta--start reveal" style="--d: 6">
+            {{ site.place }} · {{ site.year | roman }}
+          </span>
+        }
+        <span class="hero__meta hero__meta--end reveal" style="--d: 7">
+          {{ labels.scrollToEnter }}
+        </span>
+      </div>
+
+      <p class="overline reveal" style="--d: 0">{{ labels.justForYou }}</p>
+      <h1 id="library-title" class="hero__title reveal" style="--d: 1">
+        <app-ink-text [text]="site.title" />
+      </h1>
+      <div class="ornate-divider hero__divider reveal" style="--d: 4" aria-hidden="true">✶</div>
+      <p class="hero__tagline reveal" style="--d: 5">{{ site.tagline }}</p>
+      <span class="hero__cue reveal" style="--d: 7" aria-hidden="true"></span>
+    </section>
+
+    <section class="preface" aria-labelledby="preface-title">
+      <!-- The note arrives folded in three and sealed; it opens as it comes into view. -->
+      <div class="letter" appReveal="0.4">
+        <ng-container *ngTemplateOutlet="note; context: { $implicit: true }" />
+        <div class="letter__flap letter__flap--bottom" aria-hidden="true" inert>
+          <div class="letter__face letter__face--front">
+            <ng-container *ngTemplateOutlet="note; context: { $implicit: false }" />
+            <span class="letter__shade"></span>
+          </div>
+          <div class="letter__face letter__face--back"></div>
+        </div>
+        <div class="letter__flap letter__flap--top" aria-hidden="true" inert>
+          <div class="letter__face letter__face--front">
+            <ng-container *ngTemplateOutlet="note; context: { $implicit: false }" />
+            <span class="letter__shade"></span>
+          </div>
+          <div class="letter__face letter__face--back">
+            <app-wax-seal class="letter__seal" [size]="64" [monogram]="site.monogram" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="shelf" aria-labelledby="shelf-title">
+      <header class="shelf__head" appReveal>
+        <p class="overline">{{ labels.theShelf }}</p>
+        <h2 id="shelf-title" class="shelf__title"><app-ink-text [text]="labels.yourStories" /></h2>
+      </header>
+
+      <app-bookcase
+        [stories]="stories"
+        [marks]="marks()"
+        [details]="details()"
+        [taken]="taken()"
+        (take)="takeDown($event)"
+      />
+    </section>
+  </main>
+
+  <footer class="colophon">
+    <div class="ornate-divider" aria-hidden="true">❦</div>
+    <p class="overline overline--muted">{{ labels.madeWithCare }} · {{ site.year | roman }}</p>
+  </footer>
+
+  <app-volume-viewer
+    [marks]="marks()"
+    [details]="details()"
+    (returned)="taken.set(null)"
+    (read)="read($event)"
+  />
+
+  <ng-template #note let-main>
+    <article class="preface__certificate ornate-frame">
       <p class="overline overline--flanked">{{ site.preface.label }}</p>
-      <h2 id="preface-title" class="preface__heading">{{ site.preface.heading }}</h2>
+      <h2 class="preface__heading" [attr.id]="main ? 'preface-title' : null">
+        {{ site.preface.heading }}
+      </h2>
       <div class="ornate-divider ornate-divider--wide" aria-hidden="true">❦</div>
       <div class="preface__body">
         @for (paragraph of site.preface.paragraphs; track $index) {
-          <p [class.drop-cap]="$first">{{ paragraph }}</p>
+          <p>{{ paragraph }}</p>
         }
       </div>
       <p class="preface__signature">— {{ site.preface.signature }}</p>
     </article>
-  </section>
-
-  <section class="shelf" aria-labelledby="shelf-title">
-    <header class="shelf__head" appReveal>
-      <p class="overline">{{ labels.theShelf }}</p>
-      <h2 id="shelf-title" class="shelf__title">{{ labels.yourStories }}</h2>
-    </header>
-
-    <ul class="shelf__grid">
-      @for (story of stories; track story.slug; let i = $index) {
-        @let mark = marks()[story.slug];
-        @let detail = details()[story.slug];
-        <li appReveal [style.--d]="i">
-          <a class="card" [routerLink]="['/read', story.slug]">
-            <span class="corner-flourish" aria-hidden="true"></span>
-            @if (story.featured) {
-              <span class="card__seal"><app-wax-seal [size]="52" /></span>
-            }
-            <app-story-cover [story]="story" [volume]="i + 1" />
-
-            <div class="card__body" [attr.lang]="story.lang">
-              <p class="overline" [attr.lang]="site.lang">
-                {{ labels.volume }} {{ i + 1 | roman }}
-                @if (mark?.finished) {
-                  <span class="card__read">· {{ labels.finished }}</span>
-                }
-              </p>
-              <h3 class="card__title">{{ story.title }}</h3>
-              @if (story.subtitle) {
-                <p class="card__subtitle">{{ story.subtitle }}</p>
-              }
-              <p class="card__blurb">{{ story.blurb }}</p>
-            </div>
-
-            <div class="card__foot">
-              <span class="card__meta" [class.is-known]="!!detail">
-                @if (detail) {
-                  {{ labels.chapters(detail.chapters) }} · {{ labels.minutes(detail.minutes) }}
-                } @else {
-                  &nbsp;
-                }
-              </span>
-              <span class="card__cta">
-                @if (!mark) {
-                  {{ labels.beginReading }}
-                } @else if (mark.finished) {
-                  {{ labels.readAgain }}
-                } @else {
-                  {{ labels.continueReading }}
-                }
-                <span aria-hidden="true">›</span>
-              </span>
-            </div>
-          </a>
-        </li>
-      }
-    </ul>
-  </section>
-</main>
-
-<footer class="colophon">
-  <div class="ornate-divider" aria-hidden="true">❦</div>
-  <p class="overline overline--muted">
-    {{ labels.madeWithCare }} · {{ site.year | roman }}
-  </p>
-</footer>
+  </ng-template>
+}

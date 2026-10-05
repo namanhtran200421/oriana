@@ -37,6 +37,17 @@ export interface Labels {
   openMe: string;
   openTheSeal: string;
   madeWithCare: string;
+  takeDown: string;
+  takeDownShort: string;
+  turnOver: string;
+  scrollToEnter: string;
+  lightingTheLamp: string;
+  journey: string;
+  theDesk: string;
+  theLetter: string;
+  returnToShelf: string;
+  reserved: string;
+  leftOffAt: (place: string) => string;
   chapters: (count: number) => string;
   minutes: (count: number) => string;
   pageOf: (page: number, total: number) => string;
@@ -76,6 +87,17 @@ const EN: Labels = {
   openMe: 'Open me',
   openTheSeal: 'Open the seal',
   madeWithCare: 'Made with care',
+  takeDown: 'Take down a volume',
+  takeDownShort: 'Take down',
+  turnOver: 'Turn over',
+  scrollToEnter: 'Scroll to enter',
+  lightingTheLamp: 'Lighting the lamp',
+  journey: 'Through the library',
+  theDesk: 'The desk',
+  theLetter: 'The letter',
+  returnToShelf: 'Back to the shelf',
+  reserved: 'Kept for the stories still to come',
+  leftOffAt: (place) => `You left off at ${place}`,
   chapters: (n) => (n === 1 ? '1 chapter' : `${n} chapters`),
   minutes: (n) => `${n} min`,
   pageOf: (page, total) => `Page ${page} of ${total}`,
@@ -115,6 +137,17 @@ const VI: Labels = {
   openMe: 'Mở ra nhé',
   openTheSeal: 'Mở dấu niêm phong',
   madeWithCare: 'Gửi bạn',
+  takeDown: 'Lấy một cuốn xuống',
+  takeDownShort: 'Lấy xuống',
+  turnOver: 'Lật lại',
+  scrollToEnter: 'Cuộn để vào',
+  lightingTheLamp: 'Đang thắp đèn',
+  journey: 'Lối đi trong thư viện',
+  theDesk: 'Bàn viết',
+  theLetter: 'Lá thư',
+  returnToShelf: 'Đặt lại lên kệ',
+  reserved: 'Dành cho những chuyện chưa viết',
+  leftOffAt: (place) => `Đang đọc dở ở ${place}`,
   chapters: (n) => `${n} chương`,
   minutes: (n) => `${n} phút`,
   pageOf: (page, total) => `Trang ${page} / ${total}`,

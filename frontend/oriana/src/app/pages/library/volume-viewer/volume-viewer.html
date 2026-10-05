@@ -1,0 +1,81 @@
+<dialog
+  #dialog
+  class="viewer"
+  [class.is-lit]="phase() === 'flying' || phase() === 'settled'"
+  [class.is-settled]="phase() === 'settled'"
+  aria-labelledby="viewer-title"
+  (cancel)="onCancel($event)"
+  (click)="onClick($event)"
+>
+  @if (current(); as v) {
+    @let mark = marks()[v.story.slug];
+    @let detail = details()[v.story.slug];
+    <div class="viewer__layout">
+      <div class="viewer__stage">
+        <div class="viewer__halo" aria-hidden="true"></div>
+        <div class="viewer__floor" aria-hidden="true"></div>
+        <div
+          #tome
+          class="tome"
+          aria-hidden="true"
+          [attr.data-binding]="v.story.binding ?? 'crimson'"
+        >
+          <div class="tome__face tome__face--back"></div>
+          <div class="tome__face tome__face--top"></div>
+          <div class="tome__face tome__face--bottom"></div>
+          <div class="tome__face tome__face--fore"></div>
+          <div class="tome__face tome__face--spine">
+            <app-spine [story]="v.story" [volume]="v.volume" [finished]="!!mark?.finished" />
+            <span class="tome__shade"></span>
+          </div>
+          <div class="tome__face tome__face--front">
+            <app-book-cover [story]="v.story" [volume]="v.volume" [named]="true" />
+            <span class="tome__shade"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer__details" [attr.lang]="v.story.lang">
+        <p class="overline" [attr.lang]="siteLang">
+          {{ labels.volume }} {{ v.volume | roman }}
+          @if (mark?.finished) {
+            <span class="viewer__muted">· {{ labels.finished }}</span>
+          }
+        </p>
+        <h2 id="viewer-title" class="viewer__title">{{ v.story.title }}</h2>
+        @if (v.story.subtitle) {
+          <p class="viewer__subtitle">{{ v.story.subtitle }}</p>
+        }
+        <div class="ornate-divider viewer__divider" aria-hidden="true">❦</div>
+        <p class="viewer__blurb">{{ v.story.blurb }}</p>
+        <p class="viewer__facts" [attr.lang]="siteLang">
+          @if (detail) {
+            {{ labels.chapters(detail.chapters) }} · {{ labels.minutes(detail.minutes) }} ·
+          }
+          {{ v.story.author }}
+        </p>
+        @if (mark && !mark.finished) {
+          <p class="viewer__mark" [attr.lang]="siteLang">
+            <span class="viewer__ribbon" aria-hidden="true"></span>
+            {{ labels.leftOffAt(mark.label) }}
+          </p>
+        }
+        <div class="viewer__actions" [attr.lang]="siteLang">
+          <button #readButton type="button" class="btn btn--primary" (click)="readIt()">
+            @if (!mark) {
+              {{ labels.beginReading }}
+            } @else if (mark.finished) {
+              {{ labels.readAgain }}
+            } @else {
+              {{ labels.continueReading }}
+            }
+            <span aria-hidden="true">›</span>
+          </button>
+          <button type="button" class="btn btn--secondary" (click)="close()">
+            {{ labels.returnToShelf }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</dialog>

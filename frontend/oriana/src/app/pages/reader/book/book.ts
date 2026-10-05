@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { prefersReducedMotion } from '../../../core/motion';
-import { BookCover } from '../book-cover/book-cover';
+import { BookCover } from '../../../ui/book-cover/book-cover';
 import { Face, PAPER, PageSide, SpreadFaces } from '../book-model';
 import { BookPage } from '../book-page/book-page';
 import { ReaderContext } from '../reader-context';

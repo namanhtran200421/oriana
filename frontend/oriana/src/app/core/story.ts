@@ -34,6 +34,8 @@ export interface SiteConfig {
   author: string;
   title: string;
   tagline: string;
+  /** Where the stories happened, set small beneath her name. */
+  place?: string;
   year: number;
   preface: {
     label: string;

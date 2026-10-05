@@ -1,4 +1,12 @@
-import { DestroyRef, Directive, ElementRef, afterNextRender, inject, signal } from '@angular/core';
+import {
+  DestroyRef,
+  Directive,
+  ElementRef,
+  afterNextRender,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 
 /** Lets an element settle in like ink the first time it scrolls into view. */
 @Directive({
@@ -9,6 +17,9 @@ import { DestroyRef, Directive, ElementRef, afterNextRender, inject, signal } fr
   },
 })
 export class Reveal {
+  /** How much of the element must be in view first, 0 to 1 (default: any). */
+  readonly appReveal = input(0, { transform: (value: unknown) => Number(value) || 0 });
+
   protected readonly revealed = signal(false);
 
   constructor() {
@@ -26,7 +37,7 @@ export class Reveal {
           this.revealed.set(true);
           observer.disconnect();
         },
-        { rootMargin: '0px 0px -8% 0px' },
+        { rootMargin: '0px 0px -8% 0px', threshold: this.appReveal() },
       );
       observer.observe(element);
       destroyRef.onDestroy(() => observer.disconnect());

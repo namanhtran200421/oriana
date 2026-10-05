@@ -1,0 +1,91 @@
+@let out = taken();
+
+<div class="case" appReveal>
+  <div class="case__crown" aria-hidden="true">
+    <span class="case__plate">{{ plate() }}</span>
+  </div>
+
+  <div class="case__lamp" aria-hidden="true">
+    <span class="case__lamp-arm"></span>
+    <span class="case__lamp-shade"></span>
+    <span class="case__lamp-light"></span>
+  </div>
+
+  <div class="case__body">
+    @for (row of rows(); track $index) {
+      <div class="case__row" [style.--row]="$index">
+        <div class="case__books">
+          @for (item of row.items; track item.id; let i = $index) {
+            @switch (item.kind) {
+              @case ('volume') {
+                @let volume = asVolume(item);
+                @let mark = marks()[volume.story.slug];
+                <button
+                  type="button"
+                  class="item volume"
+                  [attr.data-cursor]="labels.takeDownShort"
+                  [style.--i]="i"
+                  [class.is-taken]="out === volume.story.slug"
+                  [attr.aria-label]="ariaFor(volume)"
+                  (click)="takeDown(volume, $event)"
+                  (pointerenter)="hovered.set(volume)"
+                  (pointerleave)="hovered.set(null)"
+                  (focus)="hovered.set(volume)"
+                  (blur)="hovered.set(null)"
+                >
+                  <app-spine
+                    [story]="volume.story"
+                    [volume]="volume.volume"
+                    [finished]="!!mark?.finished"
+                  />
+                  <span class="volume__sheen" aria-hidden="true"></span>
+                  @if (mark && !mark.finished) {
+                    <span class="volume__ribbon" aria-hidden="true"></span>
+                  }
+                </button>
+              }
+              @case ('book') {
+                @let book = asBook(item);
+                <span
+                  class="item book"
+                  aria-hidden="true"
+                  [class.is-wide]="book.wide"
+                  [class.has-bands]="book.bands"
+                  [class.is-gilt]="book.gilt"
+                  [class.is-leaning]="book.lean !== 0"
+                  [style.--i]="i"
+                  [style.--w]="book.width"
+                  [style.--h]="book.height"
+                  [style.--c]="book.color"
+                  [style.--lean]="book.lean"
+                  [style.--offset]="book.offset"
+                ></span>
+              }
+              @default {
+                <app-curio class="item" [kind]="asObject(item).kind" [style.--i]="i" />
+              }
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="case__base">
+    <p class="case__plaque" aria-live="polite">
+      @if (hovered(); as volume) {
+        @let detail = details()[volume.story.slug];
+        <span class="case__plaque-title">
+          {{ labels.volume }} {{ volume.volume | roman }} · {{ volume.story.title }}
+        </span>
+        @if (detail) {
+          <span class="case__plaque-meta">
+            {{ labels.chapters(detail.chapters) }} · {{ labels.minutes(detail.minutes) }}
+          </span>
+        }
+      } @else {
+        <span class="case__plaque-title">{{ labels.takeDown }}</span>
+      }
+    </p>
+  </div>
+</div>

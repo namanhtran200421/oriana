@@ -57,7 +57,7 @@
 <ng-template #face let-face let-side="side" let-named="named">
   @switch (face.type) {
     @case ('cover') {
-      <app-book-cover [named]="named" />
+      <app-book-cover [story]="ctx.story()" [volume]="ctx.volume()" [named]="named" />
     }
     @case ('page') {
       <app-book-page [page]="face.page" [side]="side" />

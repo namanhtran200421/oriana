@@ -35,9 +35,11 @@ $bp-lg: 1024px;
   text-shadow: var(--text-engraved);
 }
 
-/// Brass foil stamped into leather.
+/// Brass foil stamped into leather, dulled where tarnish has gathered.
 @mixin brass-foil {
-  background: var(--gradient-brass);
+  background:
+    var(--tex-tarnish) 0 0 / 300px,
+    var(--gradient-brass);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

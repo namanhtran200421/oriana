@@ -9,14 +9,18 @@ describe('parseManuscript', () => {
     ]);
   });
 
-  it('gives the first paragraph the drop cap', () => {
-    const [chapter] = parseManuscript('# One\n\nFirst.\n\nSecond.').chapters;
-    expect(chapter.html).toBe('<p class="lead">First.</p>\n<p>Second.</p>');
+  it('keeps every line break as written', () => {
+    const [chapter] = parseManuscript(
+      '# One\n\nBut then I saw hers. \nMy name?\\\nTwice.',
+    ).chapters;
+    expect(chapter.html).toContain('But then I saw hers.<br>My name?<br>Twice.');
   });
 
-  it('joins soft-wrapped lines and keeps hard breaks', () => {
-    const [chapter] = parseManuscript('# One\n\nA line\ncontinued.  \nBroken.').chapters;
-    expect(chapter.html).toContain('A line continued.<br>Broken.');
+  it('deepens the pause for every extra blank line', () => {
+    const [chapter] = parseManuscript('# One\n\nJust her.\n\nAnd me.\n\n\n\nAlone.').chapters;
+    expect(chapter.html).toBe(
+      '<p>Just her.</p>\n<p>And me.</p>\n<p style="--blank-lines: 3">Alone.</p>',
+    );
   });
 
   it('keeps every line break inside letters', () => {

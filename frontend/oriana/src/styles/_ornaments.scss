@@ -96,38 +96,6 @@
   }
 }
 
-// Subtle 24px brackets for cards; brighten when the card is hovered.
-.corner-flourish {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border: 1px solid var(--color-brass);
-    opacity: 0.6;
-    transition: opacity var(--dur-slow) var(--ease-out);
-  }
-
-  &::before {
-    top: 10px;
-    left: 10px;
-    border-right: none;
-    border-bottom: none;
-  }
-
-  &::after {
-    right: 10px;
-    bottom: 10px;
-    border-top: none;
-    border-left: none;
-  }
-}
-
 .arch-top {
   border-radius: var(--radius-arch);
 }
@@ -143,16 +111,6 @@
 :is(a, .card, figure):hover .sepia,
 .sepia:hover {
   filter: none;
-}
-
-.drop-cap::first-letter {
-  float: left;
-  margin: 0.04em 0.16em 0 0;
-  font-family: var(--font-display);
-  font-size: 4.5rem;
-  line-height: 0.8;
-  color: var(--color-brass);
-  text-shadow: 2px 2px 4px rgb(0 0 0 / 0.3);
 }
 
 .engraved {

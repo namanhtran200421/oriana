@@ -1,0 +1,502 @@
+@use 'mixins' as *;
+
+:host {
+  display: block;
+}
+
+// ---------------------------------------------------------------------------
+// The case: carved walnut, a gilt-filleted crown, a brass picture light.
+// ---------------------------------------------------------------------------
+
+.case {
+  --wood: #2c1b11;
+  --wood-hi: #5b3b22;
+  --wood-lo: #110a06;
+  --side: clamp(0.85rem, 2.4vw, 1.9rem);
+  position: relative;
+  max-width: 68rem;
+  margin-inline: auto;
+  filter: drop-shadow(0 2.5rem 2.75rem rgb(0 0 0 / 0.65));
+}
+
+.case__crown {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  height: clamp(3.25rem, 6vw, 4.75rem);
+  margin-inline: calc(var(--side) * -0.6);
+  border-radius: 3px 3px 0 0;
+  background:
+    var(--tex-grain-h) 0 0 / 600px 300px,
+    var(--tex-mottle) 0 0 / 420px,
+    linear-gradient(
+      180deg,
+      var(--wood-hi) 0,
+      var(--wood) 6%,
+      var(--wood-lo) 11%,
+      #3a2416 11%,
+      var(--wood) 24%,
+      var(--wood-lo) 29%,
+      rgb(201 169 98 / 0.6) 29%,
+      rgb(201 169 98 / 0.6) 31%,
+      var(--wood-lo) 31%,
+      var(--wood) 40%,
+      #3a2416 80%,
+      var(--wood-lo) 96%,
+      #000 100%
+    );
+  box-shadow:
+    0 0.6rem 1.2rem rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 220 170 / 0.2);
+
+  // A run of carved dentils beneath the frieze.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 2% 7%;
+    height: 10%;
+    background: repeating-linear-gradient(90deg, #3d2617 0 10px, var(--wood-lo) 10px 16px);
+    opacity: 0.85;
+  }
+}
+
+.case__plate {
+  @include label(clamp(0.56rem, 1.1vw, 0.72rem));
+  position: relative;
+  top: 12%;
+  padding: 0.45em 1.9em;
+  border-radius: 2px;
+  background:
+    var(--tex-scratches) 0 0 / 260px,
+    var(--tex-tarnish) 0 0 / 300px,
+    linear-gradient(180deg, #d6b56c, #a8863f 48%, #7a5a24);
+  color: #3a2a12;
+  letter-spacing: 0.3em;
+  text-shadow: 0 1px 0 rgb(255 240 200 / 0.45);
+  white-space: nowrap;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    inset 0 -1px 0 rgb(0 0 0 / 0.3),
+    0 2px 4px rgb(0 0 0 / 0.5);
+
+  // Two brass pins.
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #f3dc9c, #5a3f14);
+    translate: 0 -50%;
+  }
+
+  &::before {
+    left: 0.7em;
+  }
+
+  &::after {
+    right: 0.7em;
+  }
+}
+
+.case__lamp {
+  position: absolute;
+  top: clamp(3.25rem, 6vw, 4.75rem);
+  left: 50%;
+  z-index: 3;
+  width: min(42%, 21rem);
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.case__lamp-arm {
+  position: absolute;
+  top: 0;
+  inset-inline: 14%;
+  height: 0.95rem;
+  border-inline: 2px solid #a8863f;
+}
+
+.case__lamp-shade {
+  position: absolute;
+  top: 0.85rem;
+  inset-inline: 0;
+  height: 0.75rem;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: linear-gradient(180deg, #e2c27a, #8a6a2c 60%, #4d3812);
+  box-shadow: 0 0.35rem 1.2rem rgb(255 200 120 / 0.4);
+}
+
+.case__lamp-light {
+  position: absolute;
+  top: 1.5rem;
+  inset-inline: -32%;
+  height: clamp(14rem, 32vw, 24rem);
+  background: radial-gradient(
+    ellipse 58% 100% at 50% 0,
+    rgb(255 205 130 / 0.3),
+    rgb(255 190 110 / 0.09) 55%,
+    transparent 78%
+  );
+  mix-blend-mode: screen;
+  animation: lamp-breathe 7s ease-in-out infinite;
+}
+
+.case__body {
+  position: relative;
+  z-index: 1;
+  padding-inline: var(--side);
+  background:
+    var(--tex-grain-v) 0 0 / 300px 600px,
+    var(--tex-mottle) 0 0 / 420px,
+    var(--tex-mottle) 170px 90px / 260px,
+    linear-gradient(90deg, var(--wood-lo), var(--wood-hi) 35%, var(--wood) 70%, var(--wood-lo))
+      left / var(--side) 100% no-repeat,
+    linear-gradient(90deg, var(--wood-lo), var(--wood) 30%, var(--wood-hi) 65%, var(--wood-lo))
+      right / var(--side) 100% no-repeat,
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.38) 0 1px, transparent 1px 7rem),
+    linear-gradient(180deg, #1a100a, #24160e 45%, #150c07);
+}
+
+.case__row {
+  position: relative;
+  container-type: inline-size;
+  padding-top: clamp(1.25rem, 3vw, 2.25rem);
+  // The shelf above throws its shadow on the back boards.
+  box-shadow: inset 0 1.5rem 1.6rem -1rem rgb(0 0 0 / 0.75);
+}
+
+// A row is exactly ROW_EMS wide (see shelf.ts), so every spine scales with it.
+.case__books {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 21.2em;
+  padding-bottom: 1.2em;
+  font-size: calc(100cqi / 28);
+
+  @include md {
+    font-size: calc(100cqi / 76);
+  }
+
+  // The shelf board, its front edge catching the lamp.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 2;
+    height: 1.2em;
+    background:
+      linear-gradient(180deg, rgb(196 176 146 / 0.2), transparent 14%),
+      radial-gradient(ellipse 45% 120% at 50% 30%, rgb(255 222 170 / 0.08), transparent),
+      var(--tex-grain-h) calc(var(--row, 0) * -170px) 0 / 600px 300px,
+      linear-gradient(180deg, #74502f 0, #4a2e1a 14%, #2c1b10 58%, #150c07 100%);
+    box-shadow:
+      0 0.5em 0.8em rgb(0 0 0 / 0.65),
+      inset 0 1px 0 rgb(255 220 170 / 0.28);
+  }
+}
+
+.case__base {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  min-height: clamp(3.75rem, 7vw, 5rem);
+  margin-inline: calc(var(--side) * -0.35);
+  padding: 0.9rem 1rem;
+  border-radius: 0 0 3px 3px;
+  background:
+    var(--tex-grain-h) 0 0 / 600px 300px,
+    var(--tex-mottle) 0 0 / 420px,
+    linear-gradient(
+      180deg,
+      var(--wood-lo),
+      var(--wood) 14%,
+      var(--wood-hi) 18%,
+      var(--wood) 30%,
+      #22150d 80%,
+      var(--wood-lo)
+    );
+}
+
+.case__plaque {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  min-width: min(100%, 22rem);
+  min-height: 3.1rem;
+  align-content: center;
+  padding: 0.5rem 1.6rem;
+  border-radius: 2px;
+  background:
+    var(--tex-scratches) 0 0 / 260px,
+    var(--tex-tarnish) 0 0 / 300px,
+    linear-gradient(180deg, #d6b56c, #a8863f 48%, #7a5a24);
+  color: #3a2a12;
+  text-align: center;
+  text-shadow: 0 1px 0 rgb(255 240 200 / 0.4);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    inset 0 -1px 0 rgb(0 0 0 / 0.3),
+    0 2px 6px rgb(0 0 0 / 0.5);
+}
+
+.case__plaque-title {
+  @include label(0.66rem);
+  letter-spacing: 0.2em;
+}
+
+.case__plaque-meta {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+// ---------------------------------------------------------------------------
+// What stands on the shelves. Sizes are in em of the row.
+// ---------------------------------------------------------------------------
+
+.item {
+  position: relative;
+  display: block;
+  flex: none;
+}
+
+.item:last-child:not(.book) {
+  margin-left: auto;
+}
+
+.is-wide {
+  display: none;
+
+  @include md {
+    display: block;
+  }
+}
+
+// Shelved one after another as the case comes into view.
+:host-context(.js) .case:not(.is-revealed) .item {
+  opacity: 0;
+}
+
+.case.is-revealed .item {
+  animation: shelve 1100ms var(--ease-ink) both;
+  animation-delay: calc(250ms + var(--row, 0) * 220ms + var(--i, 0) * 32ms);
+}
+
+// Oriana's volumes: taller, gilt, and drawn a little forward when reached for.
+.volume {
+  width: 4.4em;
+  height: 18.6em;
+  padding: 0;
+  border: 0;
+  border-radius: 0.3em 0.3em 0.18em 0.18em;
+  background: none;
+  box-shadow: 0.25em 0 0.5em rgb(0 0 0 / 0.55);
+  font-size: inherit;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  transition:
+    transform 650ms var(--ease-out),
+    filter 650ms var(--ease-out);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -0.2em;
+    border-radius: inherit;
+    box-shadow: 0 0 1.2em 0.1em rgb(232 196 120 / 0);
+    pointer-events: none;
+    transition: box-shadow 650ms var(--ease-out);
+  }
+
+  &:hover,
+  &:focus-visible {
+    filter: brightness(1.12);
+    transform: translateY(-1.25em) scale(1.03);
+
+    &::after {
+      box-shadow: 0 0 1.7em 0.3em rgb(232 196 120 / 0.4);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 0.35em;
+  }
+
+  &.is-taken {
+    visibility: hidden;
+    transition: none;
+  }
+}
+
+// Now and then light runs down a volume's gilt, inviting a hand.
+.volume__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(172deg, transparent 38%, rgb(255 236 190 / 0.34) 50%, transparent 62%)
+    50% 130% / 100% 300% no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: sheen 8s var(--ease-out) infinite;
+  animation-delay: calc(2.4s + var(--i, 0) * 0.7s);
+}
+
+// A silk ribbon hangs from a volume left half-read.
+.volume__ribbon {
+  position: absolute;
+  top: 100%;
+  left: 60%;
+  z-index: 3;
+  width: 0.62em;
+  height: 2.6em;
+  margin-top: -0.3em;
+  background: linear-gradient(90deg, #5e1622, #a23949 50%, #6d1c28);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+  transform-origin: 50% 0;
+  animation: ribbon-sway 5s ease-in-out infinite;
+}
+
+// Neighbours make room: the books either side tip away on their far corners.
+.volume:is(:hover, :focus-visible) + .book {
+  transform: rotate(4deg);
+  transform-origin: 100% 100%;
+}
+
+.book:has(+ .volume:is(:hover, :focus-visible)) {
+  transform: rotate(-4deg);
+  transform-origin: 0 100%;
+}
+
+.book {
+  --gilt: none;
+  width: calc(var(--w) * 1em);
+  height: calc(var(--h) * 1em);
+  margin-left: calc(var(--offset) * 1em);
+  border-radius: 0.22em 0.22em 0.1em 0.1em;
+  --patch: calc((var(--i, 0) + var(--row, 0) * 13) * -37px);
+  background:
+    var(--gilt),
+    linear-gradient(
+      180deg,
+      rgb(214 190 150 / 0.22),
+      transparent 2.5%,
+      transparent 97%,
+      rgb(214 190 150 / 0.18)
+    ),
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.55),
+      rgb(255 236 200 / 0.09) 30%,
+      rgb(255 236 200 / 0.02) 55%,
+      rgb(0 0 0 / 0.5)
+    ),
+    var(--tex-pores) var(--patch) calc(var(--patch) * 1.6) / 140px,
+    var(--tex-scuffs) calc(var(--patch) * 1.4) var(--patch) / 300px,
+    var(--tex-mottle) calc(var(--patch) * 1.9) calc(var(--patch) * 0.7) / 420px,
+    var(--c);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.4),
+    0.18em 0 0.35em rgb(0 0 0 / 0.4);
+  transform-origin: 50% 100%;
+  transition: transform 700ms var(--ease-out);
+
+  &:hover {
+    transform: translateY(-0.45em);
+  }
+}
+
+.book.is-gilt {
+  // Two short gilt rules where a title and an author would be stamped.
+  --gilt:
+    linear-gradient(rgb(181 150 86 / 0.5), rgb(181 150 86 / 0.5)) 50% 21% / 58% 0.16em no-repeat,
+    linear-gradient(rgb(181 150 86 / 0.35), rgb(181 150 86 / 0.35)) 50% 25% / 36% 0.12em no-repeat;
+}
+
+.book.has-bands::before,
+.book.has-bands::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  height: 0.42em;
+  border-block: 0.07em solid rgb(201 169 98 / 0.5);
+  background: rgb(0 0 0 / 0.2);
+}
+
+.book.has-bands::before {
+  top: 8%;
+}
+
+.book.has-bands::after {
+  bottom: 8%;
+}
+
+.book.is-leaning {
+  rotate: calc(var(--lean) * 1deg);
+  transform-origin: 100% 100%;
+}
+
+// The stir runs on `transform`, beside the shelving animation on `translate`,
+// so neither restarts the other.
+.case.is-revealed .book.is-stirring {
+  animation:
+    shelve 1100ms var(--ease-ink) both calc(250ms + var(--row, 0) * 220ms + var(--i, 0) * 32ms),
+    stir 2.4s var(--ease-out);
+}
+
+@keyframes shelve {
+  from {
+    opacity: 0;
+    translate: 0 -1.8em;
+  }
+}
+
+@keyframes stir {
+  0%,
+  100% {
+    transform: none;
+  }
+  22% {
+    transform: translateY(-1.1em) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-0.9em) rotate(1deg);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    background-position: 50% 130%;
+  }
+  24%,
+  100% {
+    background-position: 50% -30%;
+  }
+}
+
+@keyframes ribbon-sway {
+  0%,
+  100% {
+    rotate: -4deg;
+  }
+  50% {
+    rotate: 5deg;
+  }
+}
+
+@keyframes lamp-breathe {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}

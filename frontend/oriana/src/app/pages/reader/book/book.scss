@@ -72,11 +72,7 @@
   bottom: 4px;
   z-index: 0;
   width: 8px;
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(232 223 212 / 0.22) 0 1px,
-    rgb(28 23 20 / 0.9) 1px 2px
-  );
+  background: repeating-linear-gradient(90deg, rgb(250 247 242) 0 1px, rgb(196 182 160) 1px 2px);
   transition:
     transform 900ms var(--ease-out),
     opacity 700ms var(--ease-out);
@@ -237,5 +233,11 @@
 .paper {
   position: absolute;
   inset: 0;
-  background: var(--page-bg);
+  background:
+    var(--page-texture) center / cover,
+    var(--page-bg);
+}
+
+.paper[data-side='verso'] {
+  background-image: var(--page-texture-verso);
 }

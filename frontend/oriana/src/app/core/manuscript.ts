@@ -1,12 +1,14 @@
 /**
- * A deliberately small Markdown dialect for writing novels:
+ * A deliberately small Markdown dialect for writing novels. Line breaks are
+ * set exactly as written: a new line stays a new line, a blank line leaves a
+ * blank line on the page, and every extra blank line widens the pause.
  *
  *   # Chapter title            starts a chapter (numbered I, II, III…)
  *   # Prologue {-}             starts an unnumbered chapter
  *   ## A heading               small engraved heading inside a chapter
  *   *italic*  _italic_         emphasis;  **bold** for the rare shout
- *   > A letter…                letters & verse; line breaks are kept
- *   * * *                      scene break (also *** or ---)
+ *   > A letter…                letters & verse, set apart in italic
+ *   * * *                    scene break (also *** or ---)
  *   ![Caption](plates/x.jpg)   an arch-topped plate on its own line
  *
  * Straight quotes, -- and ... are set as proper typography.
@@ -19,7 +21,7 @@ export interface ManuscriptChapter {
   /** Typeset title HTML. */
   titleHtml: string;
   numbered: boolean;
-  /** Body HTML; the first paragraph carries the drop cap. */
+  /** Body HTML. */
   html: string;
   words: number;
 }
@@ -42,7 +44,7 @@ const QUOTE = /^\s*>\s?(.*)$/;
 const SCENE_BREAK = /^\s*(?:\*\s*\*\s*\*|-{3,}|_{3,}|⁂)\s*$/;
 const FIGURE = /^!\[([^\]]*)\]\(([^)\s]+)\)$/;
 const UNNUMBERED = /\s*\{(?:-|\.unnumbered)\}\s*$/;
-const HARD_BREAK = /(?: {2,}|\\)$/;
+const HARD_BREAK = /\s*\\$/;
 
 export function parseManuscript(source: string): Manuscript {
   const lines = source.replace(/^﻿/, '').replace(/\r\n?/g, '\n').split('\n');
@@ -50,13 +52,20 @@ export function parseManuscript(source: string): Manuscript {
   let draft: Draft | null = null;
   let paragraph: string[] = [];
   let quote: string[] | null = null;
+  /** Blank lines since the last written line, and above the open paragraph. */
+  let blanks = 0;
+  let pause = 0;
 
   const current = (): Draft => (draft ??= { title: '', numbered: false, blocks: [], words: 0 });
 
   const flushParagraph = () => {
     if (!paragraph.length) return;
     const chapter = current();
-    chapter.blocks.push(`<p>${renderLines(paragraph, false)}</p>`);
+    // One blank line is the ordinary gap between paragraphs; each extra one
+    // deepens it by a line.
+    const deeper = pause > 1 && chapter.blocks.at(-1)?.startsWith('<p');
+    const style = deeper ? ` style="--blank-lines: ${pause}"` : '';
+    chapter.blocks.push(`<p${style}>${renderLines(paragraph)}</p>`);
     chapter.words += countWords(paragraph.join(' '));
     paragraph = [];
   };
@@ -64,7 +73,7 @@ export function parseManuscript(source: string): Manuscript {
   const flushQuote = () => {
     if (!quote) return;
     const chapter = current();
-    const stanzas = splitOnBlank(quote).map((lines) => `<p>${renderLines(lines, true)}</p>`);
+    const stanzas = splitOnBlank(quote).map((lines) => `<p>${renderLines(lines)}</p>`);
     if (stanzas.length) chapter.blocks.push(`<blockquote>${stanzas.join('')}</blockquote>`);
     chapter.words += countWords(quote.join(' '));
     quote = null;
@@ -78,6 +87,15 @@ export function parseManuscript(source: string): Manuscript {
   };
 
   for (const raw of lines) {
+    if (!raw.trim()) {
+      flushQuote();
+      flushParagraph();
+      blanks++;
+      continue;
+    }
+    const gap = blanks;
+    blanks = 0;
+
     const quoted = QUOTE.exec(raw);
     if (quoted) {
       flushParagraph();
@@ -115,11 +133,7 @@ export function parseManuscript(source: string): Manuscript {
       continue;
     }
 
-    if (!trimmed) {
-      flushParagraph();
-      continue;
-    }
-
+    if (!paragraph.length) pause = gap;
     paragraph.push(raw);
   }
   flushChapter();
@@ -128,8 +142,6 @@ export function parseManuscript(source: string): Manuscript {
 }
 
 function finish(draft: Draft): ManuscriptChapter {
-  const lead = draft.blocks.findIndex((block) => block.startsWith('<p>'));
-  if (lead >= 0) draft.blocks[lead] = draft.blocks[lead].replace('<p>', '<p class="lead">');
   return {
     title: plain(draft.title),
     titleHtml: inline(draft.title),
@@ -139,16 +151,9 @@ function finish(draft: Draft): ManuscriptChapter {
   };
 }
 
-/** Joins source lines, honouring Markdown hard breaks (or every break, for letters). */
-function renderLines(lines: string[], keepBreaks: boolean): string {
-  const text = lines
-    .map((line, i) => {
-      const last = i === lines.length - 1;
-      const hard = keepBreaks || HARD_BREAK.test(line);
-      const content = line.replace(HARD_BREAK, '').trim();
-      return last ? content : content + (hard ? '\n' : ' ');
-    })
-    .join('');
+/** Sets each source line on a line of its own, exactly as written. */
+function renderLines(lines: string[]): string {
+  const text = lines.map((line) => line.trim().replace(HARD_BREAK, '')).join('\n');
   return inline(text).replace(/\n/g, '<br>');
 }
 

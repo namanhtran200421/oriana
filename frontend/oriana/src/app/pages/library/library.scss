@@ -1,7 +1,16 @@
 @use 'mixins' as *;
 
 :host {
+  position: relative;
   display: block;
+}
+
+// The page floats above the hall (app-library-scene).
+.masthead,
+main,
+.colophon {
+  position: relative;
+  z-index: 1;
 }
 
 .masthead {
@@ -15,6 +24,15 @@
   @include md {
     padding: 1.75rem 2rem;
   }
+}
+
+// Over the reading room the masthead stays put while the camera moves.
+.masthead--over {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 3;
+  max-width: none;
+  background: linear-gradient(180deg, rgb(5 3 2 / 0.6), transparent);
 }
 
 .masthead__brand {
@@ -48,26 +66,88 @@
   }
 }
 
+// Her name, set large before the moonlit window, between faint gilt margins
+// with the place and year noted at the foot, as on a title page.
 .hero {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  padding: clamp(2.5rem, 8vh, 4rem) var(--gutter) clamp(2rem, 5vh, 3rem);
+  justify-content: center;
+  gap: 1rem;
+  min-height: min(86dvh, 54rem);
+  padding: 2rem var(--gutter) 5.5rem;
   text-align: center;
+}
+
+.hero__frame {
+  position: absolute;
+  inset: 0 var(--gutter);
+  border-inline: 1px solid rgb(201 169 98 / 0.14);
+  pointer-events: none;
 
   @include md {
-    padding: clamp(3rem, 10vh, 6rem) 2rem clamp(2.5rem, 7vh, 4.5rem);
+    inset-inline: 2rem;
   }
 }
 
-.hero__title {
-  font-size: clamp(2.75rem, 7vw, 4.75rem);
-  line-height: 1.05;
-  letter-spacing: -0.015em;
-  text-shadow: var(--text-engraved);
+.hero__meta {
+  @include label(0.6rem);
+  position: absolute;
+  bottom: 1.4rem;
+  color: var(--color-muted-fg);
 }
 
+.hero__meta--start {
+  left: 1rem;
+}
+
+.hero__meta--end {
+  right: 1rem;
+}
+
+.hero__title {
+  font-size: clamp(4.5rem, 15vw, 11rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.55)) drop-shadow(0 0 2rem rgb(0 0 0 / 0.65));
+}
+
+.hero__divider {
+  max-width: 12rem;
+  margin-top: 0.75rem;
+}
+
+.hero__tagline {
+  color: rgb(232 223 212 / 0.82);
+  font-family: var(--font-heading);
+  font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+  font-style: italic;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.7));
+}
+
+// A thread of gilt running down: there is more below.
+.hero__cue {
+  position: relative;
+  width: 1px;
+  height: 3.5rem;
+  margin-top: 1.5rem;
+  overflow: hidden;
+  background: linear-gradient(180deg, transparent, rgb(201 169 98 / 0.45), transparent);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    width: 3px;
+    height: 0.9rem;
+    border-radius: 2px;
+    background: var(--color-brass-light);
+    box-shadow: 0 0 6px var(--color-brass);
+    animation: cue 2.8s var(--ease-ink) infinite;
+  }
+}
 
 // "Proclamation": the preface set as a framed certificate.
 .preface {
@@ -78,16 +158,162 @@
   }
 }
 
+// The note arrives folded in three, sealed. When it comes into view the top
+// third swings open, then the bottom, and it lies flat to be read. Each flap
+// is a window onto a full copy of the note, so the folds line up exactly;
+// once open, the flaps step aside for the real, readable note beneath.
+.letter {
+  position: relative;
+  max-width: var(--content-narrow);
+  margin-inline: auto;
+  perspective: 2200px;
+}
+
+.letter__flap {
+  position: absolute;
+  inset-inline: 0;
+  height: calc(100% / 3);
+  transform-style: preserve-3d;
+  transition:
+    transform 1.4s var(--ease-ink) var(--open-at),
+    visibility 0s 3.1s;
+}
+
+.letter__flap--top {
+  --open-at: 0.9s;
+  top: 0;
+  transform-origin: 50% 100%;
+}
+
+.letter__flap--bottom {
+  --open-at: 1.6s;
+  bottom: 0;
+  transform-origin: 50% 0;
+}
+
+.letter__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.letter__face--front .preface__certificate {
+  position: absolute;
+  inset-inline: 0;
+  height: 300%;
+}
+
+.letter__flap--top .preface__certificate {
+  top: 0;
+}
+
+.letter__flap--bottom .preface__certificate {
+  bottom: 0;
+}
+
+// The outside of the sheet: blank paper, the ink of the other side faintly
+// showing through, darker towards the fold. The seal sits across its edge.
+.letter__face--back {
+  overflow: visible;
+  display: grid;
+  place-items: end center;
+  background:
+    linear-gradient(0deg, rgb(70 45 20 / 0.3), transparent 45%),
+    var(--tex-foxing) 0 0 / 380px,
+    var(--page-texture-verso) center / cover,
+    var(--page-bg);
+  transform: rotateX(180deg);
+}
+
+.letter__flap--bottom .letter__face--back {
+  background:
+    linear-gradient(180deg, rgb(70 45 20 / 0.3), transparent 45%),
+    var(--tex-foxing) 120px 60px / 380px,
+    var(--page-texture-verso) center / cover,
+    var(--page-bg);
+}
+
+.letter__seal {
+  margin-bottom: -32px;
+}
+
+// As each flap turns towards the light, its inside brightens.
+.letter__shade {
+  position: absolute;
+  inset: 0;
+  background: rgb(40 26 12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.4s var(--ease-ink) var(--open-at);
+}
+
+:host-context(.js) .letter:not(.is-revealed) {
+  > .preface__certificate {
+    clip-path: inset(33.4% -3rem);
+  }
+
+  .letter__flap--top {
+    transform: rotateX(-180deg);
+  }
+
+  .letter__flap--bottom {
+    transform: rotateX(180deg);
+  }
+
+  .letter__shade {
+    opacity: 0.6;
+  }
+}
+
+.letter.is-revealed {
+  > .preface__certificate {
+    clip-path: inset(-3rem);
+    transition: clip-path 0s 3.1s;
+  }
+
+  .letter__flap {
+    visibility: hidden;
+  }
+}
+
+// The note itself, written out on old paper in the same ink as the books.
 .preface__certificate {
+  --color-fg: var(--ink);
+  --color-muted-fg: var(--ink-faded);
+  --color-brass: var(--ink-gilt);
+  --color-border: var(--ink-rule);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   max-width: var(--content-narrow);
   margin-inline: auto;
   padding: 2.5rem 1.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: rgb(37 30 25 / 0.5);
+  border-radius: 2px;
+  color: var(--color-fg);
+  background:
+    // It has been folded in three for a long time, and the creases stayed.
+    linear-gradient(
+      180deg,
+      transparent calc(100% / 3 - 1px),
+      rgb(90 60 30 / 0.16) calc(100% / 3 - 1px),
+      rgb(255 250 240 / 0.4) calc(100% / 3 + 1px),
+      transparent calc(100% / 3 + 3px),
+      transparent calc(200% / 3 - 1px),
+      rgb(255 250 240 / 0.4) calc(200% / 3 - 1px),
+      rgb(90 60 30 / 0.16) calc(200% / 3 + 1px),
+      transparent calc(200% / 3 + 3px)
+    ),
+    // Edges browned by years in a drawer.
+    radial-gradient(ellipse at 50% 45%, transparent 50%, rgb(110 72 32 / 0.34) 100%),
+    var(--tex-foxing) 0 0 / 380px,
+    var(--page-texture) center / cover,
+    var(--page-bg);
+  box-shadow:
+    0 1.5rem 3rem rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(80 56 30 / 0.25);
+  rotate: -0.4deg;
 
   @include md {
     gap: 2rem;
@@ -110,10 +336,6 @@
 
   @include md {
     font-size: 1.1875rem;
-  }
-
-  .drop-cap {
-    color: var(--color-fg);
   }
 }
 
@@ -138,137 +360,13 @@
 .shelf__head {
   display: grid;
   gap: 0.75rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
   text-align: center;
 }
 
 .shelf__title {
   font-size: clamp(2.25rem, 5vw, 3rem);
-}
-
-.shelf__grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem;
-  padding: 0;
-  list-style: none;
-
-  li {
-    display: flex;
-    flex: 1 1 18rem;
-    max-width: 23rem;
-  }
-}
-
-.card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
-  padding: 1.5rem 1.5rem 1.25rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg-alt);
-  color: inherit;
-  text-decoration: none;
-  transition:
-    border-color var(--dur-slow) var(--ease-out),
-    box-shadow var(--dur-slow) var(--ease-out);
-
-  app-story-cover {
-    transition: transform var(--dur-dramatic) var(--ease-out);
-  }
-
-  &:hover {
-    border-color: rgb(201 169 98 / 0.5);
-    box-shadow: var(--shadow-lift);
-
-    app-story-cover {
-      transform: scale(1.02);
-    }
-
-    .corner-flourish::before,
-    .corner-flourish::after {
-      opacity: 1;
-    }
-
-    .card__cta {
-      color: var(--color-brass-light);
-      letter-spacing: 0.34em;
-    }
-  }
-}
-
-// Wax seal pressed over the card's edge for the featured volume.
-.card__seal {
-  position: absolute;
-  top: -0.75rem;
-  right: 1.5rem;
-  z-index: 2;
-}
-
-.card__body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.card__read {
-  color: var(--color-muted-fg);
-}
-
-.card__title {
-  font-size: 1.875rem;
-  line-height: 1.1;
-}
-
-.card__subtitle {
-  color: var(--color-muted-fg);
-  font-family: var(--font-heading);
-  font-size: 1.125rem;
-  font-style: italic;
-  line-height: 1.35;
-}
-
-.card__blurb {
-  margin-top: 0.25rem;
-}
-
-.card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 3rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.card__meta {
-  color: var(--color-muted-fg);
-  font-size: 0.9375rem;
-  font-style: italic;
-  line-height: 1.3;
-  opacity: 0;
-  transition: opacity var(--dur-dramatic) var(--ease-out);
-
-  &.is-known {
-    opacity: 1;
-  }
-}
-
-.card__cta {
-  @include label(0.6875rem);
-  display: inline-flex;
-  gap: 0.5em;
-  color: var(--color-brass);
-  white-space: nowrap;
-  transition:
-    letter-spacing var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out);
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.6));
 }
 
 .colophon {
@@ -277,4 +375,13 @@
   gap: 1.25rem;
   padding: 1rem var(--gutter) 3.5rem;
   text-align: center;
+}
+
+@keyframes cue {
+  from {
+    top: -1rem;
+  }
+  to {
+    top: 100%;
+  }
 }

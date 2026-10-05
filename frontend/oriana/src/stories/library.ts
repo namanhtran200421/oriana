@@ -15,7 +15,7 @@ export const LIBRARY: readonly StoryEntry[] = [
     binding: 'crimson',
     featured: true,
     blurb: 'Hey, we have the same name, haha!',
-    epigraph: { text: 'The girl whom got a part of me where I`ve forgotten' },
+    epigraph: { text: 'To the girl who found a piece of me I had long forgotten existed, and held it as though it had always belonged in her hands' },
     load: () => import('./the-lantern-keeper.md').then((m) => m.default),
   },
   {

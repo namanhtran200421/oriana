@@ -1,23 +1,33 @@
 @use 'mixins' as *;
 
-// Aged-oak paper, darkening into the gutter, warmed by the lamp.
+// Old paper, darkening into the gutter, warmed by the lamp. The site's colours
+// are re-inked here so every shared style reads dark on light.
 :host {
+  --color-fg: var(--ink);
+  --color-muted-fg: var(--ink-faded);
+  --color-brass: var(--ink-gilt);
+  --color-border: var(--ink-rule);
+  --gradient-brass: linear-gradient(180deg, #9a7b3a 0%, var(--ink-gilt) 50%, #5e4718 100%);
+  --text-engraved: 0 1px 0 rgb(255 255 255 / 0.6);
+
   position: absolute;
   inset: 0;
   display: block;
   overflow: hidden;
   color: var(--color-fg);
   background:
-    linear-gradient(90deg, rgb(0 0 0 / 0.42) 0%, rgb(0 0 0 / 0.14) 4%, transparent 11%),
-    radial-gradient(ellipse 90% 70% at 55% 40%, rgb(201 169 98 / 0.05), transparent 70%),
+    linear-gradient(90deg, rgb(74 52 30 / 0.32) 0%, rgb(74 52 30 / 0.1) 4%, transparent 11%),
+    radial-gradient(ellipse 90% 70% at 55% 40%, rgb(201 169 98 / 0.06), transparent 70%),
+    var(--page-texture) center / cover,
     var(--page-bg);
   border-radius: 0 4px 4px 0;
 }
 
 :host([data-side='verso']) {
   background:
-    linear-gradient(270deg, rgb(0 0 0 / 0.42) 0%, rgb(0 0 0 / 0.14) 4%, transparent 11%),
-    radial-gradient(ellipse 90% 70% at 45% 40%, rgb(201 169 98 / 0.05), transparent 70%),
+    linear-gradient(270deg, rgb(74 52 30 / 0.32) 0%, rgb(74 52 30 / 0.1) 4%, transparent 11%),
+    radial-gradient(ellipse 90% 70% at 45% 40%, rgb(201 169 98 / 0.06), transparent 70%),
+    var(--page-texture-verso) center / cover,
     var(--page-bg);
   border-radius: 4px 0 0 4px;
 }
@@ -213,4 +223,9 @@
   font-family: var(--font-glyph);
   opacity: 0.3;
   translate: -50% -50%;
+}
+
+// Ink would sink into the crimson the button fills with on hover.
+.btn--secondary:hover {
+  color: var(--page-bg);
 }

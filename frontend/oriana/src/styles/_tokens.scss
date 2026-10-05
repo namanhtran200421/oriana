@@ -19,10 +19,18 @@
   --color-on-brass: #1c1714;
 
   // Book materials
-  --page-bg: #251e19;
+  --page-bg: #faf7f2; // Old Paper: the texture's own tone, shown while it loads
+  --page-texture: url('/textures/paper.webp');
+  --page-texture-verso: url('/textures/paper-verso.webp'); // the same sheet, turned
   --leather-crimson: #5b1a25;
   --leather-mahogany: #3b2419;
   --leather-oak: #33291f;
+
+  // Ink on the paper pages
+  --ink: #2b2119; // Iron-Gall Ink
+  --ink-faded: #6f5c48;
+  --ink-gilt: #7f6128; // Brass, deepened enough to read on paper
+  --ink-rule: #d8cab4;
 
   --gradient-brass: linear-gradient(
     180deg,
