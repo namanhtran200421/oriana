@@ -11,6 +11,7 @@
 :host {
   position: relative;
   display: block;
+  transform-origin: 50% 100%;
 }
 
 :host([data-kind='bookend']) {
@@ -80,6 +81,11 @@
     border-radius: 0.1em;
     background: linear-gradient(#e2c27a, #6d4f1c);
   }
+}
+
+.inkwell,
+.stack {
+  cursor: pointer;
 }
 
 .inkwell {

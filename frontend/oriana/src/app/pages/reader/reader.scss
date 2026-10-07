@@ -1,6 +1,6 @@
 @use 'mixins' as *;
 
-// The reading desk: a pool of lamplight from above, shadow pooling below.
+// The reading desk: dark wooden boards, lamplight from above, shadow below.
 :host {
   position: fixed;
   inset: 0;
@@ -8,9 +8,9 @@
   grid-template-rows: var(--bar-top) minmax(0, 1fr) var(--bar-bottom);
   overflow: hidden;
   background:
-    radial-gradient(ellipse 70% 55% at 50% 0%, rgb(201 169 98 / 0.08), transparent 70%),
-    radial-gradient(ellipse 80% 60% at 50% 105%, rgb(0 0 0 / 0.35), transparent 70%),
-    var(--color-bg);
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgb(255 180 94 / 0.12), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% 105%, rgb(0 0 0 / 0.45), transparent 70%),
+    repeating-linear-gradient(180deg, #2e1f17 0 30px, #261911 30px 34px), var(--color-bg);
 }
 
 // Chrome recedes while reading and returns when reached for.
@@ -83,9 +83,43 @@
   justify-self: end;
 }
 
+// On a phone the bar keeps to what is needed while reading.
+.bar__locket {
+  display: none;
+
+  @include md {
+    display: inline-flex;
+  }
+}
+
+.bar__aa span {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
 .stage {
   position: relative;
   min-height: 0;
+
+  // Candlelight: the pages warmed and dimmed, for reading in the dark. A
+  // flat veil over the book, so the turning pages keep their depth.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background:
+      radial-gradient(ellipse 55% 50% at 50% 42%, rgb(255 168 76 / 0.1), transparent 70%),
+      rgb(36 20 8 / 0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 900ms var(--ease-out);
+  }
+
+  :host(.is-candlelit) &::after {
+    opacity: 1;
+  }
 }
 
 // Brass medallions either side of the book on larger screens.
@@ -225,4 +259,84 @@
   visibility: hidden;
   pointer-events: none;
   contain: strict;
+}
+
+// Reading settings: a small card under the bar, opened by the Aa button.
+.reading-settings {
+  inset: calc(var(--bar-top) + 0.25rem) 0.75rem auto auto;
+  width: min(19rem, calc(100vw - 1.5rem));
+  margin: 0;
+  padding: 1.1rem 1.1rem 1rem;
+  @include panel;
+  color: var(--color-fg);
+  opacity: 0;
+  translate: 0 -0.5rem;
+  transition:
+    opacity 300ms var(--ease-out),
+    translate 400ms var(--ease-ink),
+    overlay 400ms allow-discrete,
+    display 400ms allow-discrete;
+
+  &:popover-open {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @include md {
+    right: 1.5rem;
+  }
+}
+
+@starting-style {
+  .reading-settings:popover-open {
+    opacity: 0;
+    translate: 0 -0.5rem;
+  }
+}
+
+.reading-settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3rem;
+  border-bottom: 3px dashed rgb(109 63 176 / 0.35);
+}
+
+.reading-settings__keys-title {
+  margin-top: 1rem;
+}
+
+.reading-settings__keys {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.92rem;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-muted-fg);
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 1.6rem;
+    padding: 0.05rem 0.35rem;
+    border: var(--px) solid #000;
+    border-radius: 0;
+    background: #7d7d7d;
+    box-shadow:
+      inset 2px 2px 0 rgb(255 255 255 / 0.3),
+      inset -2px -2px 0 rgb(0 0 0 / 0.35);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    text-align: center;
+  }
 }

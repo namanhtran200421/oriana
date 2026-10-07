@@ -8,7 +8,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { labelsFor } from '../../../core/i18n';
+import { playLabelsFor } from '../../../core/i18n-play';
+import { Keepsakes } from '../../../core/keepsakes';
 import { prefersReducedMotion } from '../../../core/motion';
+import { Sfx } from '../../../core/sfx';
 import { SITE } from '../../../../stories/site';
 import type { ShelfObject } from '../shelf';
 
@@ -34,9 +37,12 @@ export class Curio {
   readonly kind = input.required<ShelfObject>();
 
   protected readonly labels = labelsFor(SITE.lang);
+  protected readonly play = playLabelsFor(SITE.lang);
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly glass = viewChild<ElementRef<SVGElement>>('glass');
+  private readonly keepsakes = inject(Keepsakes);
+  private readonly sfx = inject(Sfx);
   private sand?: Animation;
   private turning = false;
 
@@ -47,6 +53,23 @@ export class Curio {
       this.pour(0.32);
       destroyRef.onDestroy(() => this.sand?.cancel());
     });
+  }
+
+  /** The inkwell rocks on its base; the stack of books shuffles. Either is a find. */
+  protected touch(keepsake: 'inkwell' | 'pile'): void {
+    this.sfx.play(keepsake === 'inkwell' ? 'tick' : 'flip');
+    this.keepsakes.unlock(keepsake);
+    if (prefersReducedMotion()) return;
+    this.host.animate(
+      [
+        { rotate: '0deg' },
+        { rotate: '-5deg' },
+        { rotate: '4deg' },
+        { rotate: '-2deg' },
+        { rotate: '0deg' },
+      ],
+      { duration: 650, easing: 'ease-out' },
+    );
   }
 
   /** Turned over, the sand that had run through starts back from the top. */

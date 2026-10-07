@@ -125,9 +125,18 @@
   top: 0.85rem;
   inset-inline: 0;
   height: 0.75rem;
+  padding: 0;
+  border: 0;
   border-radius: 0 0 50% 50% / 0 0 100% 100%;
   background: linear-gradient(180deg, #e2c27a, #8a6a2c 60%, #4d3812);
   box-shadow: 0 0.35rem 1.2rem rgb(255 200 120 / 0.4);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: box-shadow 300ms var(--ease-out);
+
+  .is-off & {
+    box-shadow: none;
+  }
 }
 
 .case__lamp-light {
@@ -143,6 +152,12 @@
   );
   mix-blend-mode: screen;
   animation: lamp-breathe 7s ease-in-out infinite;
+  transition: opacity 250ms var(--ease-out);
+
+  .is-off & {
+    opacity: 0;
+    animation: none;
+  }
 }
 
 .case__body {

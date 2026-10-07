@@ -1,73 +1,83 @@
-// Design tokens: "Library at Night".
+// Design tokens: "A Blocky Night In". Everything square, everything pixel:
+// stone-grey buttons, dark tooltip panels, warm lantern gold, rose for love.
 // CSS custom properties are the single source of truth so components, inline
-// SVG and runtime-generated book pages all read the same values.
+// SVG and runtime-generated pages all read the same values.
 
 :root {
-  // Foundation
-  --color-bg: #1c1714; // Deep Mahogany
-  --color-bg-alt: #251e19; // Aged Oak
-  --color-fg: #e8dfd4; // Antique Parchment
-  --color-muted: #3d332b; // Worn Leather
-  --color-muted-fg: #9c8b7a; // Faded Ink
-  --color-border: #4a3f35; // Wood Grain
+  // Foundation: a night-time room, a little purple.
+  --color-bg: #1b1622;
+  --color-bg-alt: #261f30;
+  --color-fg: #f6eedd; // Cream, like wool
+  --color-muted: #3a3046;
+  --color-muted-fg: #b4a6c2;
+  --color-border: #0e0a14;
 
-  // Accents
-  --color-brass: #c9a962; // Polished Brass: the interactive colour
-  --color-brass-light: #d4b872;
-  --color-brass-dark: #b8953f;
-  --color-crimson: #8b2635; // Library Crimson: wax & rare emphasis
-  --color-on-brass: #1c1714;
+  // Accents (named for what they were; they are lantern gold and rose now)
+  --color-brass: #ffd04a; // The interactive colour: lantern gold
+  --color-brass-light: #ffe58a;
+  --color-brass-dark: #d9a21e;
+  --color-crimson: #d6416b; // Rose: love, and rare emphasis
+  --color-on-brass: #2a1a06;
+  --color-grass: #5d9b38;
+  --color-grass-light: #7cc24a;
+  --color-stone: #8b8b8b;
 
-  // Book materials
-  --page-bg: #faf7f2; // Old Paper: the texture's own tone, shown while it loads
-  --page-texture: url('/textures/paper.webp');
-  --page-texture-verso: url('/textures/paper-verso.webp'); // the same sheet, turned
-  --leather-crimson: #5b1a25;
-  --leather-mahogany: #3b2419;
-  --leather-oak: #33291f;
+  // Paper, for notes and the book's pages: flat parchment, pixel-bordered.
+  --page-bg: #f4e6c6;
+  --page-edge: #c9a978;
+  --page-texture: none;
+  // A few darker flecks in the parchment, as in a blocky game's paper.
+  --page-flecks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Cpath fill='%23b8955a' fill-opacity='.18' d='M2 3h1v1H2zM11 1h1v1h-1zM7 8h1v1H7zM14 11h1v1h-1zM4 13h1v1H4zM9 14h1v1H9zM12 6h1v1h-1z'/%3E%3Cpath fill='%23fff' fill-opacity='.25' d='M5 5h1v1H5zM13 14h1v1h-1zM1 10h1v1H1z'/%3E%3C/svg%3E");
+  --page-texture-verso: none;
+  --leather-crimson: #7a1730;
+  --leather-flecks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' fill-opacity='.14' d='M1 2h1v1H1zM6 1h1v1H6zM4 5h1v1H4zM8 7h1v1H8zM2 8h1v1H2z'/%3E%3Cpath fill='%23fff' fill-opacity='.06' d='M7 3h1v1H7zM3 6h1v1H3zM9 0h1v1H9z'/%3E%3C/svg%3E");
+  --leather-mahogany: #4a2a1c;
+  --leather-oak: #3a2a1e;
 
   // Ink on the paper pages
-  --ink: #2b2119; // Iron-Gall Ink
-  --ink-faded: #6f5c48;
-  --ink-gilt: #7f6128; // Brass, deepened enough to read on paper
-  --ink-rule: #d8cab4;
+  --ink: #3a2418;
+  --ink-faded: #7a6048;
+  --ink-gilt: #9a6a12;
+  --ink-rule: #d9c49a;
 
-  --gradient-brass: linear-gradient(
-    180deg,
-    var(--color-brass-light) 0%,
-    var(--color-brass) 50%,
-    var(--color-brass-dark) 100%
-  );
+  --gradient-brass: linear-gradient(180deg, var(--color-brass-light) 0 50%, var(--color-brass) 50% 100%);
 
-  // Typography
-  --font-heading: 'Cormorant Garamond', 'Cormorant', Garamond, 'Times New Roman', serif;
-  --font-body: 'Crimson Pro', 'Crimson Text', Georgia, serif;
-  --font-display: 'Cinzel', 'Trajan Pro', 'Cormorant Garamond', serif;
-  --font-glyph: 'Cormorant Garamond', 'Apple Symbols', 'Segoe UI Symbol', serif;
-  --display-weight: 500;
-  --tracking-label: 0.28em;
+  // Typography: one pixel face for everything.
+  --font-pixel: 'Pixelify Sans', ui-monospace, 'Courier New', monospace;
+  --font-heading: var(--font-pixel);
+  --font-body: var(--font-pixel);
+  --font-display: var(--font-pixel);
+  --font-glyph: var(--font-pixel);
+  --display-weight: 600;
+  --tracking-label: 0.1em;
 
-  // Shape
-  --radius: 4px;
-  --radius-arch: 40% 40% 0 0 / 20% 20% 0 0;
+  // Shape: no rounding anywhere.
+  --radius: 0;
+  --radius-arch: 0;
+  --px: 3px; // One "pixel" of the interface's chunky borders.
 
-  // Depth
-  --shadow-lift: 0 8px 24px rgb(0 0 0 / 0.3);
-  --shadow-engraved: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.2),
-    0 2px 8px rgb(0 0 0 / 0.3);
-  --shadow-brass-glow: 0 4px 12px rgb(201 169 98 / 0.3);
-  --shadow-wax: inset 0 2px 4px rgb(255 255 255 / 0.2), inset 0 -2px 4px rgb(0 0 0 / 0.3),
-    0 4px 8px rgb(0 0 0 / 0.4);
-  --text-engraved: 1px 1px 1px rgb(0 0 0 / 0.4), -1px -1px 1px rgb(255 255 255 / 0.1);
-  --filter-sepia: sepia(0.6) contrast(0.95) brightness(0.9);
+  // Depth: hard pixel shadows and bevels, never blurred.
+  --shadow-lift: 4px 4px 0 rgb(0 0 0 / 0.45);
+  --shadow-engraved: inset 3px 3px 0 rgb(255 255 255 / 0.28), inset -3px -3px 0 rgb(0 0 0 / 0.3);
+  --shadow-brass-glow: 0 0 0 3px rgb(255 208 74 / 0.35);
+  --shadow-wax: inset 3px 3px 0 rgb(255 255 255 / 0.25), inset -3px -3px 0 rgb(0 0 0 / 0.3),
+    3px 3px 0 rgb(0 0 0 / 0.4);
+  --text-engraved: 2px 2px 0 rgb(0 0 0 / 0.45);
+  --filter-sepia: saturate(0.85);
 
-  // Motion: dignified, always decelerating, never bouncing
+  // Panels: the dark, purple-edged boxes of a blocky game's tooltips.
+  --panel-bg: rgb(22 12 30 / 0.94);
+  --panel-edge: #4b2a78;
+  --panel-edge-light: #6d3fb0;
+
+  // Motion: snappy, a little bouncy, like a game's menus.
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --ease-ink: cubic-bezier(0.16, 0.7, 0.3, 1);
-  --dur-fast: 150ms;
-  --dur-base: 300ms;
-  --dur-slow: 500ms;
-  --dur-dramatic: 700ms;
+  --ease-ink: cubic-bezier(0.2, 0.8, 0.3, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 400ms;
+  --dur-dramatic: 600ms;
 
   // Layout
   --content-max: 72rem;
@@ -75,10 +85,10 @@
   --gutter: 1rem;
 }
 
-// Cinzel ships no Vietnamese glyphs. Engrave labels in Cormorant capitals
-// instead so diacritics never fall back mid-word.
+// The pixel face has no Vietnamese marks; a plain monospace keeps the blocky
+// feel without letters falling apart mid-word.
 :lang(vi) {
-  --font-display: 'Cormorant Garamond', 'Cormorant', Garamond, serif;
-  --display-weight: 600;
-  --tracking-label: 0.2em;
+  --font-heading: ui-monospace, 'Courier New', monospace;
+  --font-body: ui-monospace, 'Courier New', monospace;
+  --font-display: ui-monospace, 'Courier New', monospace;
 }

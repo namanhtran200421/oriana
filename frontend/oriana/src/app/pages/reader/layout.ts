@@ -25,8 +25,9 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 /**
  * Sizes the book for a viewport: an open two-page spread when there is room
  * for one, a single page (bound on the left) on phones and narrow windows.
+ * `textScale` sets the type larger or smaller than the page would choose.
  */
-export function computeLayout(viewportW: number, viewportH: number): BookLayout {
+export function computeLayout(viewportW: number, viewportH: number, textScale = 1): BookLayout {
   const compact = viewportW < 720 || viewportH < 520;
   const barTop = compact ? 56 : 72;
   const barBottom = compact ? 84 : 76;
@@ -47,7 +48,11 @@ export function computeLayout(viewportW: number, viewportH: number): BookLayout 
   pageW = Math.floor(pageW);
   pageH = Math.floor(pageH);
 
-  const fontSize = clamp(Math.round(pageW / 28), 16, 21);
+  const fontSize = clamp(
+    Math.round((pageW / 28) * textScale),
+    Math.round(16 * textScale),
+    Math.round(21 * textScale),
+  );
   const leading = Math.round(fontSize * 1.6);
   const padX = clamp(Math.round(pageW * 0.1), 22, 68);
   const padTop = clamp(Math.round(pageH * 0.08), 34, 72);

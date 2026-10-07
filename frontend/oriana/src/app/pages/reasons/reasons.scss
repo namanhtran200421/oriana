@@ -1,0 +1,392 @@
+@use 'mixins' as *;
+
+:host {
+  position: fixed;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  color: var(--color-fg);
+}
+
+// The place itself, with a painted stand-in beneath while it is drawn (or
+// instead of it, where it cannot be).
+.stage {
+  position: absolute;
+  inset: 0;
+  background: #0b0d18;
+
+  &[data-world='meadow'] {
+    background: linear-gradient(180deg, #5a6cc4, #ec9db6 40%, #ffc489 58%, #5d9b38 64%, #3f7f2a);
+  }
+
+  &[data-world='skies'] {
+    background: radial-gradient(ellipse at 28% 18%, #2a3a72, #0b1430 45%, #04071a 80%);
+  }
+
+  &[data-world='valley'] {
+    background: linear-gradient(
+      180deg,
+      #4f61b6,
+      #e98aa6 40%,
+      #ffb46e 56%,
+      #2b4f8c 60%,
+      #5d9b38 78%
+    );
+  }
+}
+
+.stage__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  // Dragging looks about; taps still arrive as clicks.
+  touch-action: none;
+}
+
+// Shade at the top and foot, so the words stay easy to read on bright days.
+.stage__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(14 8 20 / 0.3) 0%,
+    transparent 14%,
+    transparent 80%,
+    rgb(14 8 20 / 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+// Moonlight, as at the open window: down while a place is fetched and on
+// the way between places; lifted as the camera arrives.
+.stage__veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, #f2f6ff, #c4d8f6 55%, #8fb0e6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1600ms var(--ease-out);
+
+  &.is-down {
+    opacity: 1;
+    transition-duration: 900ms;
+  }
+}
+
+.stage__arriving {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: #4a5a80;
+  translate: -50% -50%;
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+.bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(0.5rem, env(safe-area-inset-top)) 0.75rem 0.5rem;
+
+  @include md {
+    padding: 1rem 1.5rem;
+  }
+}
+
+// The way back: a dark slab, so it reads over bright skies too.
+.bar__back {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+}
+
+.bar__label {
+  display: none;
+
+  @include md {
+    display: inline;
+  }
+}
+
+.bar__tools {
+  display: flex;
+  gap: 0.5rem;
+}
+
+// The place's name, high in the sky, until a reason is opened.
+.intro {
+  position: absolute;
+  inset: 4.25rem var(--gutter) auto;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 0.75rem;
+  transition:
+    opacity 1200ms var(--ease-out) 600ms,
+    translate 1400ms var(--ease-ink) 600ms;
+
+  @include md {
+    top: 5rem;
+  }
+
+  &.is-shown {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  &.is-away {
+    opacity: 0;
+    translate: 0 -1rem;
+    transition-delay: 0s;
+  }
+}
+
+// A pane of smoked glass, so the words read over any sky.
+.intro__card {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  max-width: min(32rem, 100%);
+  padding: 1rem 1.6rem 1.1rem;
+  @include panel;
+  background: rgb(22 12 30 / 0.78);
+  text-align: center;
+  text-shadow: 2px 2px 0 rgb(0 0 0 / 0.5);
+
+  @include md {
+    padding: 1.2rem 2.2rem 1.25rem;
+  }
+}
+
+.intro__overline {
+  color: var(--color-brass-light);
+}
+
+.intro__name {
+  @include block-title;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.05;
+}
+
+.intro__line {
+  max-width: 30ch;
+  color: rgb(244 236 225 / 0.92);
+  font-family: var(--font-heading);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.intro__drag {
+  color: rgb(232 223 212 / 0.75);
+  font-size: 0.85rem;
+}
+
+.intro__hint {
+  @include label(0.58rem);
+  margin-top: 0.3rem;
+  color: var(--color-brass-light);
+}
+
+// A reason, on a card of old paper.
+.reason {
+  position: absolute;
+  inset: auto var(--gutter) 6.5rem;
+  z-index: 4;
+  max-height: 55dvh;
+  overflow-y: auto;
+  animation: rise 800ms var(--ease-ink) both;
+
+  @include md {
+    inset: 50% 6vw auto auto;
+    width: min(26rem, 38vw);
+    translate: 0 -50%;
+  }
+}
+
+.reason__number {
+  @include label(0.62rem);
+  color: var(--ink-gilt);
+}
+
+.reason__words {
+  font-size: clamp(1.15rem, 2.6vw, 1.4rem);
+  line-height: 1.45;
+}
+
+.reason__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reason__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  background: none;
+  color: var(--ink-faded);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  app-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+// Every reason here, written down: for those who would rather read them so.
+.list {
+  position: absolute;
+  inset: 11rem var(--gutter) 6rem;
+  z-index: 3;
+  width: min(36rem, calc(100% - 2 * var(--gutter)));
+  margin-inline: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem;
+  @include panel;
+  animation: rise 400ms var(--ease-pop) both;
+}
+
+.list__note {
+  margin-bottom: 0.75rem;
+  color: var(--color-muted-fg);
+  text-align: center;
+}
+
+.list__reasons {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list__reason {
+  display: grid;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: var(--px) solid transparent;
+  border-radius: 0;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--color-fg);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &[aria-pressed='true'] {
+    border-color: #fff;
+  }
+
+  // Read: a little pixel heart beside its number.
+  &.is-read .list__number::after {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 12px;
+    margin-left: 0.5rem;
+    background: var(--pixel-heart) center / contain no-repeat;
+  }
+}
+
+.list__number {
+  @include label(0.56rem);
+  color: var(--color-brass);
+}
+
+.list__words {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+// The way between places, along the foot: a hotbar, each place a slot.
+.places {
+  position: absolute;
+  inset: auto 0 max(1rem, env(safe-area-inset-bottom));
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  padding-inline: var(--gutter);
+}
+
+.place {
+  @include label(0.56rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  margin-left: calc(var(--px) * -1);
+  padding: 0 0.9rem;
+  border: var(--px) solid #000;
+  border-radius: 0;
+  background: rgb(30 30 30 / 0.78);
+  box-shadow: inset 0 0 0 var(--px) rgb(139 139 139 / 0.55);
+  color: #e0e0e0;
+  text-shadow: 2px 2px 0 rgb(0 0 0 / 0.6);
+  cursor: pointer;
+
+  &:hover {
+    color: #fff;
+    box-shadow: inset 0 0 0 var(--px) rgb(200 200 200 / 0.8);
+  }
+
+  // The slot chosen: a thick white frame, as in a hotbar.
+  &.is-here {
+    position: relative;
+    z-index: 1;
+    outline: var(--px) solid #fff;
+    box-shadow: inset 0 0 0 var(--px) #000;
+    background: rgb(60 60 60 / 0.85);
+    color: var(--color-brass);
+  }
+
+  app-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// On a phone the hotbar is icons and counts only, so it fits in one row.
+.place__name {
+  display: none;
+
+  @include md {
+    display: inline;
+  }
+}
+
+.place__count {
+  color: var(--color-brass-light);
+  letter-spacing: 0.08em;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0) scale(0.96);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.45;
+  }
+}

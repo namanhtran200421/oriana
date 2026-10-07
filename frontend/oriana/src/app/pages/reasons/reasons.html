@@ -1,0 +1,118 @@
+<app-cursor />
+
+<div
+  class="stage"
+  aria-hidden="true"
+  [attr.data-world]="id()"
+  [class.is-ready]="ready()"
+  [class.is-drawn]="drawn()"
+>
+  @if (drawn()) {
+    <canvas #canvas class="stage__canvas"></canvas>
+  }
+  <div class="stage__scrim"></div>
+  <div class="stage__veil" [class.is-down]="!ready() || leaving()"></div>
+  @if (building()) {
+    <p class="stage__arriving overline">{{ labels.arriving }}</p>
+  }
+</div>
+
+<header class="bar">
+  <button type="button" class="btn btn--ghost bar__back" (click)="back()">
+    <app-icon name="arrow-left" />
+    <span class="bar__label">{{ labels.backToLibrary }}</span>
+  </button>
+  <div class="bar__tools">
+    <app-locket-button />
+    <app-music-toggle />
+  </div>
+</header>
+
+<section class="intro" [class.is-away]="selected() !== null" [class.is-shown]="ready()">
+  <div class="intro__card">
+    <p class="overline intro__overline">{{ labels.reasons }}</p>
+    <h1 class="intro__name">{{ words().name }}</h1>
+    <p class="intro__line">{{ words().line }}</p>
+    <p class="intro__hint" aria-live="polite">
+      @if (readHere() === total()) {
+        {{ labels.allReadHere }}
+      } @else {
+        @if (drawn()) {
+          {{ words().hint }} ·
+        }
+        {{ labels.readOf(readHere(), total()) }}
+      }
+    </p>
+    @if (touch() && drawn()) {
+      <p class="intro__drag">{{ labels.dragToLook }}</p>
+    }
+  </div>
+</section>
+
+@if (selected() !== null) {
+  @let index = selected()!;
+  <article class="paper-note reason" [attr.aria-label]="labels.reasonNumber(index + 1)">
+    <p class="reason__number">{{ labels.reasonNumber(index + 1) }}</p>
+    <p class="reason__words">{{ words().reasons[index] }}</p>
+    <p class="paper-note__signature">— {{ signature }}</p>
+    <div class="reason__actions">
+      <button type="button" class="btn btn--secondary btn--sm" (click)="next()">
+        {{ labels.nextReason }} <span aria-hidden="true">›</span>
+      </button>
+    </div>
+    <button type="button" class="reason__close" [attr.aria-label]="chrome.close" (click)="close()">
+      <app-icon name="x" />
+    </button>
+  </article>
+}
+
+@if (listing() || !drawn()) {
+  <section class="list" [attr.aria-label]="words().name">
+    @if (!drawn()) {
+      <p class="list__note">{{ labels.writtenDown }}</p>
+    }
+    <ol class="list__reasons">
+      @for (reason of words().reasons; track $index) {
+        <li>
+          <button
+            type="button"
+            class="list__reason"
+            [class.is-read]="reasons.has(id(), $index)"
+            [attr.aria-pressed]="selected() === $index"
+            (click)="pickFromList($index)"
+          >
+            <span class="list__number">{{ labels.reasonNumber($index + 1) }}</span>
+            <span class="list__words">{{ reason }}</span>
+          </button>
+        </li>
+      }
+    </ol>
+  </section>
+}
+
+<nav class="places" [attr.aria-label]="labels.travelTo">
+  @for (place of places; track place.id) {
+    <button
+      type="button"
+      class="place"
+      [class.is-here]="place.id === id()"
+      [attr.aria-current]="place.id === id() ? 'page' : null"
+      (click)="travel(place.id)"
+    >
+      <app-icon [name]="place.icon" />
+      <span class="place__name">{{ place.name }}</span>
+      <span class="place__count">{{ reasons.countIn(place.id) }}/{{ place.total }}</span>
+    </button>
+  }
+  @if (drawn()) {
+    <button
+      type="button"
+      class="place place--list"
+      [attr.aria-pressed]="listing()"
+      (click)="listing.set(!listing())"
+    >
+      <app-icon [name]="listing() ? 'sparkles' : 'list'" />
+      <span class="place__name">{{ listing() ? labels.asView : labels.asList }}</span>
+    </button>
+  }
+</nav>

@@ -7,9 +7,7 @@
   max-height: min(42rem, calc(100dvh - 2rem));
   margin: auto;
   padding: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg-alt);
+  @include panel;
   color: var(--color-fg);
   overflow: visible;
   opacity: 0;
@@ -34,7 +32,7 @@
   }
 
   &[open]::backdrop {
-    background: rgb(18 14 12 / 0.8);
+    background: rgb(14 8 20 / 0.78);
   }
 }
 
@@ -101,13 +99,13 @@
     color var(--dur-base) var(--ease-out);
 
   &:hover {
-    background: rgb(201 169 98 / 0.08);
+    background: rgb(255 255 255 / 0.08);
     color: var(--color-brass);
   }
 
   &[aria-current='true'] {
     color: var(--color-brass);
-    font-style: italic;
+    text-shadow: 2px 2px 0 rgb(0 0 0 / 0.45);
   }
 }
 
@@ -121,8 +119,9 @@
 .contents-dialog__leader {
   flex: 1;
   min-width: 1rem;
-  height: 1px;
-  background: var(--color-border);
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--color-muted-fg) 0 3px, transparent 3px 7px);
+  opacity: 0.5;
   transform: translateY(-0.3em);
 }
 
@@ -131,7 +130,6 @@
   color: var(--color-muted-fg);
   font-family: var(--font-body);
   font-size: 1rem;
-  font-variant-numeric: oldstyle-nums;
 }
 
 .contents-dialog__close {

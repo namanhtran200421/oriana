@@ -18,13 +18,12 @@
   font-size: var(--reader-font);
   line-height: var(--reader-leading);
   color: var(--color-fg);
-  text-align: justify;
+  // Ragged right, as a book written in a blocky game: a pixel face spaced out to justify gapes.
+  text-align: left;
   hyphens: auto;
   -webkit-hyphens: auto;
   text-wrap: pretty;
   overflow-wrap: break-word;
-  font-variant-numeric: oldstyle-nums proportional-nums;
-  font-kerning: normal;
   orphans: 2;
   widows: 2;
 
@@ -34,12 +33,13 @@
     margin-top: calc(var(--reader-leading) * var(--blank-lines, 1));
   }
 
+  // No italic in a pixel face: emphasis is a deeper ink instead.
   em {
-    font-style: italic;
+    color: var(--ink-gilt);
   }
 
   strong {
-    font-weight: 600;
+    font-weight: 700;
   }
 
   h3 {
@@ -92,13 +92,12 @@ hr.scene-break {
   break-inside: avoid;
   break-after: avoid;
 
+  // A pixel heart between scenes.
   &::before {
-    content: '\2766\FE0E';
+    content: '';
     display: block;
-    color: var(--color-brass);
-    font-family: var(--font-glyph);
-    font-size: 0.95em;
-    line-height: var(--reader-leading);
+    height: var(--reader-leading);
+    background: var(--pixel-heart) center / 14px 12px no-repeat;
   }
 }
 
@@ -106,15 +105,10 @@ hr.scene-break {
 .flow blockquote {
   margin: var(--reader-leading) 0 var(--reader-leading) 0.9em;
   padding-left: 1em;
-  border-left: 1px solid rgb(201 169 98 / 0.45);
-  color: color-mix(in srgb, var(--color-fg) 88%, var(--color-brass));
-  font-style: italic;
+  border-left: 4px solid rgb(214 65 107 / 0.55);
+  color: color-mix(in srgb, var(--color-fg) 85%, var(--color-crimson));
   text-align: left;
   hyphens: manual;
-
-  em {
-    font-style: normal;
-  }
 }
 
 // Tipped-in plates: arch-topped, aged until looked at.
@@ -133,7 +127,8 @@ hr.scene-break {
     border-radius: var(--radius-arch);
     box-shadow:
       0 0 0 4px var(--page-bg),
-      0 0 0 5px rgb(201 169 98 / 0.45);
+      0 0 0 7px #5a3a1e;
+    image-rendering: pixelated;
     filter: var(--filter-sepia);
     transition: filter var(--dur-dramatic) var(--ease-out);
     -webkit-user-drag: none;
@@ -147,7 +142,6 @@ hr.scene-break {
     margin-top: calc(var(--reader-leading) * 0.5);
     color: var(--color-muted-fg);
     font-size: 0.85em;
-    font-style: italic;
     line-height: var(--reader-leading);
     text-align: center;
   }
@@ -202,7 +196,7 @@ hr.scene-break {
   }
 
   &:hover .toc__leader {
-    background: rgb(201 169 98 / 0.6);
+    opacity: 0.9;
   }
 }
 
@@ -216,10 +210,11 @@ hr.scene-break {
 .toc__leader {
   flex: 1;
   min-width: 1.5em;
-  height: 1px;
-  background: var(--color-border);
+  height: 3px;
+  background: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 7px);
+  opacity: 0.35;
   transform: translateY(-0.3em);
-  transition: background var(--dur-base) var(--ease-out);
+  transition: opacity var(--dur-base) var(--ease-out);
 }
 
 .toc__folio {
@@ -227,5 +222,4 @@ hr.scene-break {
   color: var(--color-muted-fg);
   font-family: var(--font-body);
   font-size: 0.9em;
-  font-variant-numeric: oldstyle-nums;
 }

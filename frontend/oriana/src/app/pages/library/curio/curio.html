@@ -3,7 +3,7 @@
     <span class="bookend"></span>
   }
   @case ('inkwell') {
-    <span class="inkwell">
+    <span class="inkwell" [attr.data-cursor]="play.dipQuill" (click)="touch('inkwell')">
       <svg viewBox="0 0 46 150" focusable="false">
         <defs>
           <linearGradient id="ink-glass" x1="0" x2="1">
@@ -88,7 +88,7 @@
     </button>
   }
   @case ('stack') {
-    <span class="stack">
+    <span class="stack" [attr.data-cursor]="play.leafThrough" (click)="touch('pile')">
       <span class="stack__book stack__book--1"></span>
       <span class="stack__book stack__book--2"></span>
       <span class="stack__book stack__book--3"></span>

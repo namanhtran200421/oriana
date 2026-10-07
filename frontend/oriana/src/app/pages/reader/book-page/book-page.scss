@@ -1,14 +1,22 @@
 @use 'mixins' as *;
 
-// Old paper, darkening into the gutter, warmed by the lamp. The site's colours
-// are re-inked here so every shared style reads dark on light.
+// A page of a book and quill: flat parchment, the gutter shaded in steps,
+// a fleck or two. The site's colours are re-inked here so every shared style
+// reads dark on light.
 :host {
   --color-fg: var(--ink);
   --color-muted-fg: var(--ink-faded);
   --color-brass: var(--ink-gilt);
   --color-border: var(--ink-rule);
-  --gradient-brass: linear-gradient(180deg, #9a7b3a 0%, var(--ink-gilt) 50%, #5e4718 100%);
-  --text-engraved: 0 1px 0 rgb(255 255 255 / 0.6);
+  --gradient-brass: linear-gradient(180deg, #b8862a 0 50%, var(--ink-gilt) 50% 100%);
+  --text-engraved: none;
+  --gutter-shade: linear-gradient(
+    90deg,
+    rgb(90 58 30 / 0.24) 0 10px,
+    rgb(90 58 30 / 0.14) 10px 20px,
+    rgb(90 58 30 / 0.06) 20px 30px,
+    transparent 30px
+  );
 
   position: absolute;
   inset: 0;
@@ -16,20 +24,23 @@
   overflow: hidden;
   color: var(--color-fg);
   background:
-    linear-gradient(90deg, rgb(74 52 30 / 0.32) 0%, rgb(74 52 30 / 0.1) 4%, transparent 11%),
-    radial-gradient(ellipse 90% 70% at 55% 40%, rgb(201 169 98 / 0.06), transparent 70%),
-    var(--page-texture) center / cover,
+    var(--gutter-shade),
+    var(--page-flecks) 0 0 / 48px 48px,
     var(--page-bg);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0;
 }
 
 :host([data-side='verso']) {
   background:
-    linear-gradient(270deg, rgb(74 52 30 / 0.32) 0%, rgb(74 52 30 / 0.1) 4%, transparent 11%),
-    radial-gradient(ellipse 90% 70% at 45% 40%, rgb(201 169 98 / 0.06), transparent 70%),
-    var(--page-texture-verso) center / cover,
+    linear-gradient(
+      270deg,
+      rgb(90 58 30 / 0.24) 0 10px,
+      rgb(90 58 30 / 0.14) 10px 20px,
+      rgb(90 58 30 / 0.06) 20px 30px,
+      transparent 30px
+    ),
+    var(--page-flecks) 0 0 / 48px 48px,
     var(--page-bg);
-  border-radius: 4px 0 0 4px;
 }
 
 // Exactly one column of the flow is visible through this window.
@@ -61,20 +72,18 @@
   inset-inline: 0;
   color: var(--color-muted-fg);
   font-size: calc(var(--reader-font) * 0.85);
-  font-variant-numeric: oldstyle-nums;
   line-height: 1;
   text-align: center;
 }
 
-// A damask lattice pressed into the endpapers.
+// Little pixel hearts, in rows, printed on the endpapers.
 .endpaper {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%, rgb(201 169 98 / 0.09) 0 1.5px, transparent 2.5px) 0 0 / 28px
-      28px,
-    repeating-linear-gradient(45deg, rgb(201 169 98 / 0.035) 0 1px, transparent 1px 14px),
-    repeating-linear-gradient(-45deg, rgb(201 169 98 / 0.035) 0 1px, transparent 1px 14px);
+  background: var(--pixel-heart) 12px 12px / 14px 12px space;
+  background-size: 14px 12px;
+  background-repeat: space;
+  opacity: 0.16;
 }
 
 .bookplate {
@@ -87,13 +96,12 @@
   gap: calc(var(--reader-leading) * 0.45);
   width: min(78%, 20rem);
   padding: calc(var(--reader-leading) * 2.2) 1.25rem calc(var(--reader-leading) * 1.1);
-  border: 1px solid rgb(201 169 98 / 0.55);
-  border-radius: 40% 40% 4px 4px / 16% 16% 4px 4px;
+  border: var(--px) solid #5a3a1e;
+  border-radius: 0;
   background: var(--page-bg);
   box-shadow:
-    inset 0 0 0 4px var(--page-bg),
-    inset 0 0 0 5px rgb(201 169 98 / 0.22),
-    0 12px 30px rgb(0 0 0 / 0.35);
+    inset 0 0 0 var(--px) var(--page-edge),
+    var(--shadow-lift);
   text-align: center;
   translate: -50% -50%;
 
@@ -228,4 +236,56 @@
 // Ink would sink into the crimson the button fills with on hover.
 .btn--secondary:hover {
   color: var(--page-bg);
+}
+
+// A flower or a clover, pressed flat into the corner of one page. It glints
+// now and then, so a reader who looks will notice it.
+.treasure {
+  position: absolute;
+  bottom: calc(var(--pad-bottom) * 0.18);
+  right: calc(var(--pad-x) * 0.35);
+  z-index: 2;
+  width: calc(var(--reader-font) * 2.1);
+  height: calc(var(--reader-font) * 2.1);
+  padding: 0;
+  border: 0;
+  background: none;
+  opacity: 0.82;
+  mix-blend-mode: multiply;
+  cursor: pointer;
+  animation: glint 6s var(--ease-out) 2s infinite;
+  transition:
+    scale 400ms var(--ease-out),
+    opacity 400ms var(--ease-out);
+
+  :host([data-side='verso']) & {
+    right: auto;
+    left: calc(var(--pad-x) * 0.35);
+  }
+
+  &:hover {
+    opacity: 1;
+    scale: 1.15;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@keyframes glint {
+  0%,
+  88%,
+  100% {
+    rotate: 0deg;
+    filter: none;
+  }
+  92% {
+    rotate: -8deg;
+    filter: drop-shadow(0 0 4px rgb(214 65 107 / 0.9));
+  }
+  96% {
+    rotate: 5deg;
+  }
 }

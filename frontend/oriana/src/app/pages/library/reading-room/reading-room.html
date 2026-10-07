@@ -1,6 +1,7 @@
 <div class="room" [class.is-ready]="ready()" [class.is-leaving]="leaving()" aria-hidden="true">
   <canvas #canvas class="room__canvas"></canvas>
   <div class="room__veil"></div>
+  <div class="room__through"></div>
 </div>
 
 <!-- The scroll track: its length is the length of the walk through the room,
@@ -28,7 +29,7 @@
 </nav>
 
 <section class="moment moment--title" aria-labelledby="library-title">
-  <p class="overline reveal" style="--d: 0">{{ labels.justForYou }}</p>
+  <p class="overline reveal" style="--d: 0">{{ greeting() }}</p>
   <h1 id="library-title" class="moment__name reveal" style="--d: 1">
     <app-ink-text [text]="site.title" />
   </h1>

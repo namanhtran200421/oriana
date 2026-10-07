@@ -9,6 +9,11 @@
     <span class="masthead__count overline overline--muted">
       {{ stories.length | roman }} · {{ labels.stories }}
     </span>
+    <button type="button" class="btn btn--ghost masthead__reasons" (click)="toReasons()">
+      <app-icon name="heart" />
+      <span class="masthead__reasons-label">{{ play.reasons }}</span>
+    </button>
+    <app-locket-button />
     <app-music-toggle />
   </div>
 </header>
@@ -20,6 +25,7 @@
     [details]="details()"
     (read)="read($event)"
     (failed)="room.set(false)"
+    (wander)="wander()"
   />
 } @else {
   <app-library-scene />
@@ -37,7 +43,7 @@
         </span>
       </div>
 
-      <p class="overline reveal" style="--d: 0">{{ labels.justForYou }}</p>
+      <p class="overline reveal" style="--d: 0">{{ greeting() }}</p>
       <h1 id="library-title" class="hero__title reveal" style="--d: 1">
         <app-ink-text [text]="site.title" />
       </h1>
@@ -48,7 +54,7 @@
 
     <section class="preface" aria-labelledby="preface-title">
       <!-- The note arrives folded in three and sealed; it opens as it comes into view. -->
-      <div class="letter" appReveal="0.4">
+      <div class="letter" appReveal="0.4" (appRevealed)="keepsakes.unlock('letter')">
         <ng-container *ngTemplateOutlet="note; context: { $implicit: true }" />
         <div class="letter__flap letter__flap--bottom" aria-hidden="true" inert>
           <div class="letter__face letter__face--front">
@@ -113,3 +119,5 @@
     </article>
   </ng-template>
 }
+
+<app-companion />

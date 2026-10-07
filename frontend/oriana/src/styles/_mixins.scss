@@ -21,10 +21,10 @@ $bp-lg: 1024px;
   }
 }
 
-/// Cinzel overline: engraved, uppercase, widely tracked.
+/// A small label: pixel capitals, lightly tracked, never smaller than can be read.
 @mixin label($size: 0.6875rem) {
   font-family: var(--font-display);
-  font-size: $size;
+  font-size: max(#{$size} * 1.18, 0.72rem);
   font-weight: var(--display-weight);
   letter-spacing: var(--tracking-label);
   line-height: 1.4;
@@ -35,13 +35,63 @@ $bp-lg: 1024px;
   text-shadow: var(--text-engraved);
 }
 
-/// Brass foil stamped into leather, dulled where tarnish has gathered.
+/// Gold lettering, as the yellow text of a blocky game: flat, with a hard shadow.
 @mixin brass-foil {
-  background:
-    var(--tex-tarnish) 0 0 / 300px,
-    var(--gradient-brass);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.55));
+  color: var(--color-brass);
+  text-shadow: 2px 2px 0 #4a3206;
+}
+
+/// The dark box a blocky game shows a tooltip in: near-black, a purple edge inside a black one.
+@mixin panel {
+  border: var(--px) solid var(--color-border);
+  border-radius: 0;
+  background: var(--panel-bg);
+  box-shadow:
+    inset 0 0 0 var(--px) var(--panel-edge),
+    inset 0 var(--px) 0 var(--px) var(--panel-edge-light),
+    var(--shadow-lift);
+}
+
+/// The light-grey stone of an inventory window, bevelled: lit top-left, shaded bottom-right.
+@mixin stone {
+  border: var(--px) solid #000;
+  border-radius: 0;
+  background: #c6c6c6;
+  box-shadow:
+    inset var(--px) var(--px) 0 #fff,
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 #555,
+    var(--shadow-lift);
+  color: #2f2a33;
+}
+
+/// One inventory slot: sunk into the stone.
+@mixin slot {
+  border: 0;
+  border-radius: 0;
+  background: #8b8b8b;
+  box-shadow:
+    inset var(--px) var(--px) 0 #373737,
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 #fff;
+}
+
+/// Parchment, pixel-bordered: for notes, letters and the book's pages.
+@mixin parchment {
+  border: var(--px) solid #5a3a1e;
+  border-radius: 0;
+  background: var(--page-bg);
+  box-shadow:
+    inset 0 0 0 var(--px) var(--page-edge),
+    var(--shadow-lift);
+  color: var(--ink);
+}
+
+/// Big blocky title letters, stacked to look carved from a block.
+@mixin block-title($depth: #6b4a8a, $deeper: #2e1d40) {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-fg);
+  text-shadow:
+    0 0.06em 0 $depth,
+    0 0.12em 0 $deeper,
+    0.04em 0.16em 0 rgb(0 0 0 / 0.5);
 }

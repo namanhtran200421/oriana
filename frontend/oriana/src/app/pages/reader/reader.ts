@@ -15,10 +15,16 @@ import { Location, isPlatformBrowser } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Bookmarks } from '../../core/bookmarks';
-import { Manuscript, parseManuscript } from '../../core/manuscript';
+import { playLabelsFor } from '../../core/i18n-play';
+import { Journal } from '../../core/journal';
+import { Keepsakes } from '../../core/keepsakes';
+import type { Manuscript } from '../../core/manuscript';
+import { Manuscripts } from '../../core/manuscripts';
 import { RomanPipe } from '../../core/roman';
+import { Settings } from '../../core/settings';
 import type { StoryEntry } from '../../core/story';
 import { Icon } from '../../ui/icon';
+import { LocketButton } from '../../ui/locket-button';
 import { MusicToggle } from '../../ui/music-toggle';
 import { Book } from './book/book';
 import {
@@ -35,6 +41,12 @@ import { BookLayout, computeLayout, layoutVars, sameFlow } from './layout';
 import { Paginator } from './paginator';
 import { ReaderContext } from './reader-context';
 
+/** Keys pressed in these belong to them, not to the book. */
+const FIELDS_AND_DIALOGS = 'input, textarea, select, [contenteditable], dialog[open]';
+
+/** Turn this many pages, in any of the books, for a keepsake. */
+const PAGES_FOR_KEEPSAKE = 100;
+
 interface ContentsEntry {
   section: number;
   numeral: string;
@@ -45,7 +57,7 @@ interface ContentsEntry {
 
 @Component({
   selector: 'app-reader',
-  imports: [Book, Icon, MusicToggle, RomanPipe],
+  imports: [Book, Icon, LocketButton, MusicToggle, RomanPipe],
   templateUrl: './reader.html',
   styleUrl: './reader.scss',
   providers: [ReaderContext, Paginator],
@@ -53,6 +65,7 @@ interface ContentsEntry {
     '[attr.lang]': 'story().lang',
     '[style]': 'cssVars()',
     '[class.is-open]': 'ctx.spread() > 0',
+    '[class.is-candlelit]': 'settings.candlelight()',
     '(window:resize)': 'onResize()',
     '(document:keydown)': 'onKeydown($event)',
   },
@@ -63,9 +76,14 @@ export class Reader {
 
   protected readonly ctx = inject(ReaderContext);
   protected readonly labels = this.ctx.labels;
+  protected readonly play = computed(() => playLabelsFor(this.story().lang));
+  protected readonly settings = inject(Settings);
 
   private readonly paginator = inject(Paginator);
   private readonly bookmarks = inject(Bookmarks);
+  private readonly manuscripts = inject(Manuscripts);
+  private readonly keepsakes = inject(Keepsakes);
+  private readonly journal = inject(Journal);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
@@ -165,9 +183,36 @@ export class Reader {
       if (!position) return;
       const finished = pagesOn(this.ctx.mode(), spread).some((i) => pages[i]?.kind === 'finis');
       const label = this.describe(anchor.section);
-      untracked(() =>
-        this.bookmarks.set(this.story().slug, { ...position, label, finished }),
-      );
+      untracked(() => {
+        this.bookmarks.set(this.story().slug, { ...position, label, finished });
+        if (finished) {
+          this.journal.finish(this.story().slug);
+          this.keepsakes.unlock('finis');
+        }
+      });
+    });
+
+    // Every page turned is counted in the journal; a hundred is a keepsake.
+    let shown = 0;
+    effect(() => {
+      const spread = this.ctx.spread();
+      untracked(() => {
+        const turned = shown > 0 && spread > 0 && spread !== shown;
+        shown = spread;
+        if (turned && this.journal.count('pagesTurned') >= PAGES_FOR_KEEPSAKE) {
+          this.keepsakes.unlock('pages');
+        }
+      });
+    });
+
+    // Larger or smaller type is set again from the passage being read.
+    effect(() => {
+      const scale = this.settings.textScale();
+      untracked(() => {
+        if (!this.manuscript) return;
+        const next = computeLayout(innerWidth, innerHeight, scale);
+        if (!sameFlow(next, this.ctx.layout())) void this.paginate(next);
+      });
     });
 
     inject(DestroyRef).onDestroy(() => clearTimeout(this.resizeTimer));
@@ -200,6 +245,8 @@ export class Reader {
   protected onKeydown(event: KeyboardEvent): void {
     if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
     if (this.contents().nativeElement.open) return;
+    // Typing in a field, or anything in the locket over the book, is not for the pages.
+    if ((event.target as Element | null)?.closest?.(FIELDS_AND_DIALOGS)) return;
     const onControl = !!(event.target as HTMLElement | null)?.closest?.(
       'button, a, input, textarea, select, [contenteditable]',
     );
@@ -225,6 +272,14 @@ export class Reader {
       case 'End':
         book.goTo(this.ctx.lastSpread());
         break;
+      case '+':
+      case '=':
+        this.settings.stepText(1);
+        break;
+      case '-':
+      case '_':
+        this.settings.stepText(-1);
+        break;
       default:
         return;
     }
@@ -234,7 +289,7 @@ export class Reader {
   protected onResize(): void {
     clearTimeout(this.resizeTimer);
     this.resizeTimer = setTimeout(() => {
-      const next = computeLayout(innerWidth, innerHeight);
+      const next = this.layoutHere();
       if (this.manuscript && !sameFlow(next, this.ctx.layout())) void this.paginate(next);
       else this.ctx.layout.set(next);
     }, 160);
@@ -242,8 +297,10 @@ export class Reader {
 
   private async prepare(): Promise<void> {
     const story = this.story();
-    this.manuscript = parseManuscript(await story.load());
-    await this.paginate(this.ctx.layout());
+    this.settings.restore();
+    // Usually parsed already, while the library was open.
+    this.manuscript = await this.manuscripts.get(story);
+    await this.paginate(this.layoutHere());
 
     const mark = this.bookmarks.get(story.slug);
     if (mark && !mark.finished) {
@@ -299,6 +356,11 @@ export class Reader {
     if (position) {
       this.ctx.spread.set(spreadOfPage(layout.mode, pageOfPosition(pages, position)));
     }
+  }
+
+  /** The book's measurements for this window, at the reader's chosen type size. */
+  private layoutHere(): BookLayout {
+    return computeLayout(innerWidth, innerHeight, this.settings.textScale());
   }
 
   /** Stable SafeHtml per source, so unchanged chapters are never re-parsed. */

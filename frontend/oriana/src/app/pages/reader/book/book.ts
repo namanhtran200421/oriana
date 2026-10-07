@@ -396,6 +396,11 @@ export class Book {
       return;
     }
     const target = event.target as HTMLElement;
+    const treasure = target.closest<HTMLElement>('[data-treasure]')?.dataset['treasure'];
+    if (treasure === 'flower' || treasure === 'clover') {
+      this.ctx.findTreasure(treasure, event.clientX, event.clientY);
+      return;
+    }
     const goto = target.closest<HTMLElement>('[data-goto]');
     if (goto) {
       this.goToSection(Number(goto.dataset['goto']));

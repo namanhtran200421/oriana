@@ -5,6 +5,7 @@ import { SITE } from '../../stories/site';
 /** The few calls we make on a YouTube IFrame API player. */
 interface YouTubePlayer {
   playVideo(): void;
+  loadVideoById(videoId: string): void;
   pauseVideo(): void;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   setVolume(volume: number): void;
@@ -42,8 +43,14 @@ export function youtubeId(link: string): string | null {
   }
 }
 
+/** The video ids from one link or several, skipping any that are not videos. */
+export function youtubeIds(links: string | readonly string[] | undefined): string[] {
+  const all = typeof links === 'string' ? [links] : (links ?? []);
+  return all.map(youtubeId).filter((id): id is string => id !== null);
+}
+
 /**
- * Background music from a YouTube video, played through a hidden embedded
+ * Background music from YouTube: one song looped, or several in turn, played through a hidden embedded
  * player that lives for the whole visit. Browsers only allow sound after a
  * gesture, so it begins when the seal is broken (or on the first touch of a
  * later visit) and always fades in and out rather than starting abruptly.
@@ -52,11 +59,11 @@ export function youtubeId(link: string): string | null {
 export class Music {
   private readonly document = inject(DOCUMENT);
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
-  private readonly videoId = SITE.music ? youtubeId(SITE.music.youtube) : null;
+  private readonly videoIds = youtubeIds(SITE.music?.youtube);
   private readonly volume = SITE.music?.volume ?? 45;
 
   /** A song is configured. */
-  readonly available = this.videoId !== null;
+  readonly available = this.videoIds.length > 0;
   /** The listener wants music (it may still be loading or blocked). */
   readonly on = signal(false);
   /** Sound is actually coming out. */
@@ -64,6 +71,9 @@ export class Music {
 
   private player: YouTubePlayer | null = null;
   private ready = false;
+  /** Which song is playing, and how many in a row have failed to. */
+  private track = 0;
+  private failures = 0;
   private level = 0;
   private fade?: ReturnType<typeof setInterval>;
 
@@ -75,9 +85,10 @@ export class Music {
     const create = () => {
       const mount = this.document.createElement('div');
       host.append(mount);
+      const single = this.videoIds.length === 1;
       this.player = new win.YT!.Player(mount, {
         host: 'https://www.youtube-nocookie.com',
-        videoId: this.videoId,
+        videoId: this.videoIds[0],
         width: 200,
         height: 200,
         playerVars: {
@@ -86,10 +97,10 @@ export class Music {
           disablekb: 1,
           fs: 0,
           iv_load_policy: 3,
-          loop: 1,
-          playlist: this.videoId,
           playsinline: 1,
           rel: 0,
+          // One song loops by itself; several are moved through by hand below.
+          ...(single ? { loop: 1, playlist: this.videoIds[0] } : {}),
         },
         events: {
           onReady: () => {
@@ -98,12 +109,14 @@ export class Music {
           },
           onStateChange: ({ data }: { data: number }) => {
             this.sounding.set(data === PlayerState.Playing);
-            if (data === PlayerState.Ended && this.on()) {
-              this.player?.seekTo(0, true);
-              this.player?.playVideo();
-            }
+            if (data === PlayerState.Playing) this.failures = 0;
+            if (data === PlayerState.Ended && this.on()) this.next();
           },
-          onError: () => this.sounding.set(false),
+          onError: () => {
+            this.sounding.set(false);
+            // A song that will not play here (some cannot be embedded): try the next.
+            if (this.videoIds.length > 1 && ++this.failures < this.videoIds.length) this.next();
+          },
         },
       });
     };
@@ -148,6 +161,18 @@ export class Music {
       this.on.set(true);
       this.start();
     }
+  }
+
+  /** On to the next song, or round to the first; one song simply starts again. */
+  private next(): void {
+    if (!this.player) return;
+    if (this.videoIds.length === 1) {
+      this.player.seekTo(0, true);
+      this.player.playVideo();
+      return;
+    }
+    this.track = (this.track + 1) % this.videoIds.length;
+    this.player.loadVideoById(this.videoIds[this.track]);
   }
 
   private start(): void {

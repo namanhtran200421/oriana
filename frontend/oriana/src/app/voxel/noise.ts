@@ -1,7 +1,6 @@
 /**
- * Seeded value noise and fractal sums of it: the raw material for every
- * surface in the reading room. Tileable when asked, so textures repeat
- * without seams.
+ * Seeded value noise and fractal sums of it: the raw material for terrain,
+ * trees and every block's pixels. Tileable when asked.
  */
 export class Noise {
   private readonly perm: Uint8Array;

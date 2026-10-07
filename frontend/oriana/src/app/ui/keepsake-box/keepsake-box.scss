@@ -1,0 +1,356 @@
+@use 'mixins' as *;
+
+// The locket shares the contents dialog's shell (styles/_dialog.scss), a
+// little wider for its rows of keepsakes.
+.locket {
+  width: min(40rem, calc(100vw - 1.5rem));
+  max-height: min(48rem, calc(100dvh - 1.5rem));
+}
+
+.locket__panel {
+  padding: 2rem 1rem 0;
+
+  @include md {
+    padding: 2.5rem 2rem 0;
+  }
+}
+
+.locket__head {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.locket__title {
+  font-size: 2rem;
+  text-shadow: 3px 3px 0 rgb(0 0 0 / 0.5);
+}
+
+.locket__progress {
+  color: #80ff20;
+  text-shadow: 2px 2px 0 #1f3f08;
+}
+
+// The experience bar: green, in notches.
+.locket__bar {
+  position: relative;
+  width: min(16rem, 80%);
+  height: 12px;
+  overflow: hidden;
+  border: var(--px) solid #000;
+  background: #2a2a2a;
+}
+
+.locket__fill {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(10% - 2px),
+      rgb(0 0 0 / 0.45) calc(10% - 2px) 10%
+    ),
+    linear-gradient(180deg, #a8ff60 0 40%, #6fd12a 40% 100%);
+  transform-origin: left;
+  transition: transform 900ms steps(10);
+}
+
+.locket__tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 1.1rem 0 0;
+  border-bottom: var(--px) solid #000;
+}
+
+// Tabs like an inventory's: stone, the chosen one lighter and joined to the page.
+.locket__tab {
+  @include label(0.62rem);
+  margin-bottom: calc(var(--px) * -1);
+  padding: 0.6rem 0.9rem;
+  border: var(--px) solid #000;
+  border-bottom: 0;
+  background: #4a4a4a;
+  box-shadow: inset var(--px) var(--px) 0 rgb(255 255 255 / 0.18);
+  color: #c6c6c6;
+  text-shadow: 2px 2px 0 rgb(0 0 0 / 0.5);
+  cursor: pointer;
+
+  &:hover {
+    color: #fff;
+  }
+
+  &[aria-selected='true'] {
+    padding-bottom: calc(0.6rem + var(--px));
+    background: #6f6f6f;
+    color: var(--color-brass);
+  }
+}
+
+.locket__body {
+  flex: 1;
+  min-height: 0;
+  margin: 0 -1rem;
+  padding: 1rem 1rem 1.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @include md {
+    margin: 0 -2rem;
+    padding: 1.25rem 2rem 1.5rem;
+  }
+}
+
+.trove + .trove {
+  margin-top: 1.25rem;
+}
+
+.trove__place {
+  @include label(0.6rem);
+  margin: 0 0 0.6rem;
+  color: var(--color-muted-fg);
+}
+
+.trove__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.6rem, 1fr));
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 100%;
+  padding: 0.5rem 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--color-muted-fg);
+  text-align: center;
+  cursor: pointer;
+
+  &:hover .tile__medal {
+    background: #a8a8a8;
+  }
+
+  &[aria-pressed='true'] .tile__medal {
+    outline: var(--px) solid #fff;
+  }
+
+  &.is-found {
+    color: var(--color-fg);
+  }
+
+  &.is-fresh .tile__medal {
+    animation: fresh 1.6s var(--ease-out) 3;
+  }
+}
+
+.tile--last {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  justify-items: start;
+  gap: 0.9rem;
+  padding: 0.8rem 1rem;
+  text-align: left;
+}
+
+// Each keepsake in an inventory slot: grey when not yet found, coloured when it is.
+.tile__medal,
+.detail__medal {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  @include slot;
+  color: #5a5a5a;
+
+  app-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .is-found & {
+    color: var(--color-crimson);
+
+    app-icon {
+      filter: drop-shadow(2px 2px 0 rgb(0 0 0 / 0.35));
+    }
+  }
+}
+
+.tile__name {
+  font-family: var(--font-heading);
+  font-size: 0.98rem;
+  line-height: 1.15;
+}
+
+// The chosen keepsake, held up at the foot of the locket.
+.detail {
+  position: sticky;
+  bottom: -1.25rem;
+  display: flex;
+  gap: 0.9rem;
+  margin: 1.25rem -0.25rem -0.5rem;
+  padding: 1rem 2.5rem 1rem 1rem;
+  @include panel;
+  animation: rise 300ms var(--ease-pop) both;
+}
+
+.detail__medal {
+  flex: none;
+}
+
+.detail.is-found .detail__medal {
+  color: var(--color-crimson);
+}
+
+.detail__words {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: start;
+}
+
+.detail__name {
+  // An item's name in a tooltip: in the colour of something rare.
+  color: #ff9ad0;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.15;
+  text-shadow: 2px 2px 0 #3f1534;
+}
+
+.detail__when {
+  @include label(0.58rem);
+  color: var(--color-muted-fg);
+}
+
+.detail__note,
+.detail__hint {
+  font-family: var(--font-heading);
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+
+.detail__hint {
+  color: var(--color-brass-light);
+}
+
+.detail__hint--clue {
+  color: var(--color-fg);
+}
+
+.detail__reveal,
+.detail__close {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.detail__reveal {
+  @include label(0.62rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0;
+  color: var(--color-brass);
+
+  &:hover {
+    color: var(--color-brass-light);
+  }
+
+  app-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.detail__close {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-muted-fg);
+
+  app-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.whisper {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 3px dashed rgb(109 63 176 / 0.4);
+}
+
+.whisper__label {
+  @include label(0.6rem);
+  color: var(--color-muted-fg);
+}
+
+.whisper__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.whisper__result {
+  min-height: 1.4em;
+  color: var(--color-brass-light);
+}
+
+.journal__together {
+  margin-bottom: 0.4rem;
+  color: var(--color-brass-light);
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  text-align: center;
+}
+
+.journal__since {
+  margin-bottom: 1rem;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.reset {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  margin-top: 1.75rem;
+
+  .is-armed {
+    border-color: var(--color-crimson);
+    background: var(--color-crimson);
+    color: var(--color-fg);
+  }
+}
+
+.reset__done {
+  color: var(--color-brass-light);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0);
+  }
+}
+
+// Just found: the slot flashes, as a new item does.
+@keyframes fresh {
+  50% {
+    background: #fff6b0;
+  }
+}

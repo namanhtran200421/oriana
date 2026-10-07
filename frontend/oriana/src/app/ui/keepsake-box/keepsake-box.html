@@ -1,0 +1,324 @@
+<dialog
+  #dialog
+  class="contents-dialog locket"
+  [attr.aria-label]="labels.locket"
+  (click)="onClick($event)"
+  (close)="onClosed()"
+>
+  @if (ever()) {
+    <div class="contents-dialog__panel ornate-frame locket__panel">
+      <header class="locket__head">
+        <p class="overline">{{ labels.keepsakes }}</p>
+        <h2 class="locket__title">{{ labels.locket }}</h2>
+        <p class="locket__progress">{{ labels.foundOf(keepsakes.count(), keepsakes.total) }}</p>
+        <span class="locket__bar" aria-hidden="true">
+          <span class="locket__fill" [style.transform]="'scaleX(' + share() + ')'"></span>
+        </span>
+      </header>
+
+      <div class="locket__tabs" role="tablist">
+        @for (t of tabs; track t) {
+          <button
+            type="button"
+            role="tab"
+            class="locket__tab"
+            [id]="'locket-tab-' + t"
+            [attr.aria-selected]="tab() === t"
+            [attr.aria-controls]="'locket-panel'"
+            (click)="tab.set(t)"
+          >
+            {{ labels.tabs[t] }}
+          </button>
+        }
+      </div>
+
+      <div
+        id="locket-panel"
+        class="locket__body"
+        role="tabpanel"
+        [attr.aria-labelledby]="'locket-tab-' + tab()"
+      >
+        @switch (tab()) {
+          @case ('treasures') {
+            @if (reading()) {
+              <article class="paper-note last-letter">
+                <p class="paper-note__heading">{{ letter.heading }}</p>
+                @for (paragraph of letter.paragraphs; track $index) {
+                  <p>{{ paragraph }}</p>
+                }
+                <p class="paper-note__signature">— {{ letter.signature }}</p>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--sm"
+                  (click)="reading.set(false)"
+                >
+                  {{ labels.keepsakes }}
+                </button>
+              </article>
+            } @else {
+              @for (group of groups; track group.place) {
+                <section class="trove">
+                  <h3 class="trove__place">{{ labels.places[group.place] }}</h3>
+                  <ul class="trove__tiles">
+                    @for (k of group.items; track k.id) {
+                      @let gotTile = !!found()[k.id];
+                      <li>
+                        <button
+                          type="button"
+                          class="tile"
+                          [attr.data-keepsake-tile]="k.id"
+                          [class.is-found]="gotTile"
+                          [class.is-fresh]="fresh().has(k.id)"
+                          [attr.aria-pressed]="selected() === k.id"
+                          (click)="select(k.id)"
+                        >
+                          <span class="tile__medal" aria-hidden="true">
+                            <app-icon [name]="gotTile ? k.icon : 'lock'" />
+                          </span>
+                          <span class="tile__name">{{ k.name }}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+
+              <section class="trove trove--last">
+                <h3 class="trove__place">{{ labels.places.last }}</h3>
+                @let gotLast = !!found()[last.id];
+                <button
+                  type="button"
+                  class="tile tile--last"
+                  [attr.data-keepsake-tile]="last.id"
+                  [class.is-found]="gotLast"
+                  [class.is-fresh]="fresh().has(last.id)"
+                  [attr.aria-pressed]="selected() === last.id"
+                  (click)="select(last.id)"
+                >
+                  <span class="tile__medal" aria-hidden="true">
+                    <app-icon [name]="gotLast ? last.icon : 'lock'" />
+                  </span>
+                  <span class="tile__name">{{ last.name }}</span>
+                </button>
+              </section>
+
+              <form class="whisper" (submit)="whisper(word, $event)">
+                <label class="whisper__label" for="locket-whisper">{{ labels.whisper }}</label>
+                <div class="whisper__row">
+                  <input
+                    #word
+                    id="locket-whisper"
+                    class="field"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    [placeholder]="labels.whisperPlaceholder"
+                  />
+                  <button type="submit" class="btn btn--secondary btn--sm">
+                    {{ labels.whisperButton }}
+                  </button>
+                </div>
+                <p class="whisper__result" aria-live="polite">
+                  @switch (whispered()) {
+                    @case ('found') {
+                      {{ labels.whisperFound }}
+                    }
+                    @case ('again') {
+                      {{ labels.whisperAgain }}
+                    }
+                    @case ('nothing') {
+                      {{ labels.whisperNothing }}
+                    }
+                  }
+                </p>
+              </form>
+
+              @if (detail(); as k) {
+                @let gotDetail = !!found()[k.id];
+                <aside class="detail" [class.is-found]="gotDetail" aria-live="polite">
+                  <span class="detail__medal" aria-hidden="true">
+                    <app-icon [name]="gotDetail ? k.icon : 'lock'" />
+                  </span>
+                  <div class="detail__words">
+                    <p class="detail__name">{{ k.name }}</p>
+                    @if (gotDetail) {
+                      <p class="detail__when">{{ labels.foundOn(date(found()[k.id])) }}</p>
+                      <p class="detail__note">{{ k.note }}</p>
+                      @if (k.id === 'last') {
+                        <button
+                          type="button"
+                          class="btn btn--primary btn--sm"
+                          (click)="readLetter()"
+                        >
+                          {{ labels.readLetter }}
+                        </button>
+                      }
+                    } @else if (k.id === 'last') {
+                      <p class="detail__when">{{ labels.lastLocked(left()) }}</p>
+                    } @else {
+                      <p class="detail__when">{{ labels.notYetFound }}</p>
+                      @let level = keepsakes.hintLevel(k.id);
+                      @if (level >= 1) {
+                        <p class="detail__hint">{{ k.hint }}</p>
+                      }
+                      @if (level >= 2) {
+                        <p class="detail__hint detail__hint--clue">{{ k.clue }}</p>
+                      }
+                      @if (level < 2) {
+                        <button type="button" class="detail__reveal" (click)="hint(k.id)">
+                          <app-icon name="lightbulb" />
+                          {{ level === 0 ? labels.revealHint : labels.strongerHint }}
+                        </button>
+                      } @else {
+                        <p class="detail__when">{{ labels.allHints }}</p>
+                      }
+                    }
+                  </div>
+                  <button
+                    type="button"
+                    class="detail__close"
+                    [attr.aria-label]="labels.keepsakes"
+                    (click)="selected.set(null)"
+                  >
+                    <app-icon name="x" />
+                  </button>
+                </aside>
+              }
+            }
+          }
+
+          @case ('journal') {
+            @let j = journal.state();
+            @if (together(); as days) {
+              <p class="journal__together">♡ {{ labels.daysSince(days) }} ♡</p>
+            }
+            @if (j.since) {
+              <p class="journal__since">{{ labels.since(date(j.since + 'T12:00:00')) }}</p>
+            }
+            <dl class="stats">
+              <div class="stat">
+                <dt>{{ labels.visits }}</dt>
+                <dd>{{ j.visits }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ labels.days }}</dt>
+                <dd>{{ j.days }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ labels.pagesTurned }}</dt>
+                <dd>{{ j.pagesTurned }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ labels.storiesFinished }}</dt>
+                <dd>{{ j.finished.length }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ labels.reasonsRead }}</dt>
+                <dd>{{ reasons.count() }}/{{ reasons.total }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ labels.hintsUsed }}</dt>
+                <dd>{{ j.hintsUsed }}</dd>
+              </div>
+            </dl>
+          }
+
+          @case ('settings') {
+            <ul class="prefs">
+              <li class="pref">
+                <span class="pref__name"><app-icon name="music" /> {{ labels.sounds }}</span>
+                <button
+                  type="button"
+                  role="switch"
+                  class="switch"
+                  [attr.aria-checked]="settings.sounds()"
+                  [attr.aria-label]="labels.sounds"
+                  (click)="settings.toggle('sounds')"
+                >
+                  <span class="switch__knob"></span>
+                </button>
+              </li>
+              <li class="pref">
+                <span class="pref__name"><app-icon name="sparkles" /> {{ labels.sparkles }}</span>
+                <button
+                  type="button"
+                  role="switch"
+                  class="switch"
+                  [attr.aria-checked]="settings.sparkles()"
+                  [attr.aria-label]="labels.sparkles"
+                  (click)="settings.toggle('sparkles')"
+                >
+                  <span class="switch__knob"></span>
+                </button>
+              </li>
+              <li class="pref">
+                <span class="pref__name"><app-icon name="flame" /> {{ labels.candlelight }}</span>
+                <button
+                  type="button"
+                  role="switch"
+                  class="switch"
+                  [attr.aria-checked]="settings.candlelight()"
+                  [attr.aria-label]="labels.candlelight"
+                  (click)="settings.toggle('candlelight')"
+                >
+                  <span class="switch__knob"></span>
+                </button>
+              </li>
+              <li class="pref">
+                <span class="pref__name"><app-icon name="book-open" /> {{ labels.textSize }}</span>
+                <span class="stepper">
+                  <button
+                    type="button"
+                    class="stepper__step"
+                    [disabled]="!settings.canShrink()"
+                    [attr.aria-label]="labels.smaller"
+                    (click)="settings.stepText(-1)"
+                  >
+                    A−
+                  </button>
+                  <span class="stepper__sample" [style.font-size.em]="settings.textScale()"
+                    >Aa</span
+                  >
+                  <button
+                    type="button"
+                    class="stepper__step"
+                    [disabled]="!settings.canGrow()"
+                    [attr.aria-label]="labels.larger"
+                    (click)="settings.stepText(1)"
+                  >
+                    A+
+                  </button>
+                </span>
+              </li>
+            </ul>
+
+            <div class="reset">
+              <button
+                type="button"
+                class="btn btn--secondary btn--sm"
+                [class.is-armed]="resetArmed()"
+                (click)="reset()"
+              >
+                <app-icon name="rotate" />
+                {{ resetArmed() ? labels.resetConfirm : labels.reset }}
+              </button>
+              @if (resetDone()) {
+                <p class="reset__done" role="status">{{ labels.resetDone }}</p>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--icon contents-dialog__close"
+        [attr.aria-label]="chrome.close"
+        (click)="close()"
+      >
+        <app-icon name="x" />
+      </button>
+    </div>
+  }
+</dialog>

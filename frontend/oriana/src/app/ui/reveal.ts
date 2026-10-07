@@ -5,6 +5,7 @@ import {
   afterNextRender,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 
@@ -19,6 +20,8 @@ import {
 export class Reveal {
   /** How much of the element must be in view first, 0 to 1 (default: any). */
   readonly appReveal = input(0, { transform: (value: unknown) => Number(value) || 0 });
+  /** Emits once, as the element first comes into view. */
+  readonly appRevealed = output<void>();
 
   protected readonly revealed = signal(false);
 
@@ -28,13 +31,13 @@ export class Reveal {
 
     afterNextRender(() => {
       if (typeof IntersectionObserver !== 'function') {
-        this.revealed.set(true);
+        this.reveal();
         return;
       }
       const observer = new IntersectionObserver(
         ([entry]) => {
           if (!entry.isIntersecting) return;
-          this.revealed.set(true);
+          this.reveal();
           observer.disconnect();
         },
         { rootMargin: '0px 0px -8% 0px', threshold: this.appReveal() },
@@ -42,5 +45,10 @@ export class Reveal {
       observer.observe(element);
       destroyRef.onDestroy(() => observer.disconnect());
     });
+  }
+
+  private reveal(): void {
+    this.revealed.set(true);
+    this.appRevealed.emit();
   }
 }

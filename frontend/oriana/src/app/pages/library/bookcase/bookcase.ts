@@ -11,7 +11,10 @@ import {
 } from '@angular/core';
 import type { Bookmark } from '../../../core/bookmarks';
 import { labelsFor } from '../../../core/i18n';
+import { playLabelsFor } from '../../../core/i18n-play';
+import { Keepsakes } from '../../../core/keepsakes';
 import { prefersReducedMotion } from '../../../core/motion';
+import { Sfx } from '../../../core/sfx';
 import { RomanPipe, toRoman } from '../../../core/roman';
 import type { StoryEntry } from '../../../core/story';
 import { Reveal } from '../../../ui/reveal';
@@ -47,11 +50,16 @@ export class Bookcase {
   readonly take = output<TakenVolume>();
 
   protected readonly labels = labelsFor(SITE.lang);
+  protected readonly play = playLabelsFor(SITE.lang);
+  /** The lamp over the case can be switched off, and on again. */
+  protected readonly lampOff = signal(false);
   protected readonly rows = computed(() => buildShelves(this.stories()));
   protected readonly hovered = signal<VolumeItem | null>(null);
   protected readonly plate = computed(() => `${this.labels.exLibris} · ${SITE.recipient}`);
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly keepsakes = inject(Keepsakes);
+  private readonly sfx = inject(Sfx);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -67,6 +75,14 @@ export class Bookcase {
 
   protected ariaFor(volume: VolumeItem): string {
     return `${this.labels.volume} ${toRoman(volume.volume)}: ${volume.story.title}`;
+  }
+
+  protected toggleLamp(): void {
+    this.sfx.play('click');
+    const off = !this.lampOff();
+    this.lampOff.set(off);
+    // Lit again after being put out: the lamplighter's keepsake.
+    if (!off) this.keepsakes.unlock('lamp');
   }
 
   protected takeDown(volume: VolumeItem, event: Event): void {

@@ -6,25 +6,24 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Little stories, just for Oriana.">
-  <meta name="theme-color" content="#1C1714">
+  <meta name="theme-color" content="#1B1622">
   <meta name="color-scheme" content="dark">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" type="image/x-icon" href="favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap">
   <script>
-    // Hold the opening "ink" reveal until the three serifs have arrived, so the
-    // first thing Oriana sees is never a fallback font swapping out.
+    // Hold the opening reveal until the pixel font has arrived, so the first
+    // thing Oriana sees is never a fallback font swapping out.
     (function (doc) {
       var root = doc.documentElement;
       root.classList.add('js');
       var ready = function () { root.classList.add('fonts-ready'); };
       if (!doc.fonts || !doc.fonts.load) return ready();
       Promise.all([
-        doc.fonts.load('500 1em "Cormorant Garamond"'),
-        doc.fonts.load('italic 400 1em "Crimson Pro"'),
-        doc.fonts.load('500 1em "Cinzel"'),
+        doc.fonts.load('400 1em "Pixelify Sans"'),
+        doc.fonts.load('700 1em "Pixelify Sans"'),
       ]).then(ready, ready);
       setTimeout(ready, 1800);
     })(document);

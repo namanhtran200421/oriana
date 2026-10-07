@@ -4,7 +4,7 @@ import { Music } from '../core/music';
 import type { Lang } from '../core/story';
 import { SITE } from '../../stories/site';
 
-/** A brass medallion whose bars murmur while the music plays. */
+/** A slot whose bars (in whole pixels) murmur while the music plays. */
 @Component({
   selector: 'app-music-toggle',
   template: `
@@ -42,15 +42,14 @@ import { SITE } from '../../stories/site';
     // At rest the bars hold the shape of a quiet equalizer, so the button
     // reads as music even when silent; while sounding they murmur gently.
     .music__bars span {
-      width: 2px;
+      width: 3px;
       height: 100%;
-      border-radius: 1px;
       background: currentColor;
       opacity: 0.5;
       transform: scaleY(var(--rest));
       transition:
-        transform 700ms var(--ease-out),
-        opacity 700ms var(--ease-out);
+        transform 300ms steps(3),
+        opacity 300ms var(--ease-out);
     }
 
     .music__bars span:nth-child(1) {

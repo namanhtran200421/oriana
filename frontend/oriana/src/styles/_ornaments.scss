@@ -1,16 +1,17 @@
 @use 'mixins' as *;
 
-// Overline label, "Volume I" and friends.
+// Overline label, "Volume I" and friends: small gold capitals.
 .overline {
   @include label;
   color: var(--color-brass);
+  text-shadow: 2px 2px 0 rgb(0 0 0 / 0.45);
 }
 
 .overline--muted {
   color: var(--color-muted-fg);
 }
 
-// Label flanked by short brass rules: ── PROCLAMATION ──
+// Label flanked by short dashed rules: ▪▪▪ PROCLAMATION ▪▪▪
 .overline--flanked {
   display: flex;
   align-items: center;
@@ -21,40 +22,34 @@
   &::after {
     content: '';
     width: 2.5rem;
-    height: 1px;
-    background: var(--color-brass);
-    opacity: 0.7;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--color-brass) 0 4px, transparent 4px 8px);
+    opacity: 0.8;
   }
 }
 
-// Gradient rule with a centred glyph. The glyph is the element's own text,
-// so the markup reads <div class="ornate-divider" aria-hidden="true">❦</div>.
+// A dashed rule with a pixel heart in the middle. Markup keeps its glyph
+// (<div class="ornate-divider" aria-hidden="true">❦</div>) but the heart is drawn.
 .ornate-divider {
   display: flex;
   align-items: center;
-  gap: 0.85em;
+  gap: 1.1rem;
   width: 100%;
   max-width: 16rem;
+  height: 14px;
   margin-inline: auto;
-  color: var(--color-brass);
-  font-family: var(--font-glyph);
-  font-size: 0.9rem;
-  line-height: 1;
-  font-variant-emoji: text;
+  background: var(--pixel-heart) center / 14px 12px no-repeat;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
 
   &::before,
   &::after {
     content: '';
     flex: 1;
-    height: 1px;
-  }
-
-  &::before {
-    background: linear-gradient(90deg, transparent, var(--color-border) 40%, var(--color-brass));
-  }
-
-  &::after {
-    background: linear-gradient(90deg, var(--color-brass), var(--color-border) 60%, transparent);
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--color-brass) 0 4px, transparent 4px 8px);
+    opacity: 0.75;
   }
 }
 
@@ -62,9 +57,17 @@
   max-width: 100%;
 }
 
+:root {
+  // A heart, seven pixels by six, in rose.
+  --pixel-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath fill='%23d6416b' d='M1 0h2v1H1zM4 0h2v1H4zM0 1h7v2H0zM1 3h5v1H1zM2 4h3v1H2zM3 5h1v1H3z'/%3E%3Cpath fill='%23ff9ab8' d='M1 1h1v1H1z'/%3E%3C/svg%3E");
+  // The same heart in gold, for stamping on leather.
+  --pixel-heart-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath fill='%23ffd04a' d='M1 0h2v1H1zM4 0h2v1H4zM0 1h7v2H0zM1 3h5v1H1zM2 4h3v1H2zM3 5h1v1H3z'/%3E%3Cpath fill='%23fff2b0' d='M1 1h1v1H1z'/%3E%3C/svg%3E");
+}
+
 // Large brass corner brackets: certificates, the threshold frame.
 .ornate-frame {
   --corner: 24px;
+  // Square brackets of three pixels' thickness.
   position: relative;
 
   &::before,
@@ -73,7 +76,7 @@
     position: absolute;
     width: var(--corner);
     height: var(--corner);
-    border: 2px solid var(--color-brass);
+    border: var(--px) solid var(--color-brass);
     pointer-events: none;
   }
 

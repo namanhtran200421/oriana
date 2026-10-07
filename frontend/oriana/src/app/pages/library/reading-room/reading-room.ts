@@ -4,6 +4,7 @@ import {
   ElementRef,
   afterNextRender,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -12,12 +13,16 @@ import {
 } from '@angular/core';
 import type { Bookmark } from '../../../core/bookmarks';
 import { labelsFor } from '../../../core/i18n';
+import { playLabelsFor } from '../../../core/i18n-play';
+import { Keepsakes } from '../../../core/keepsakes';
+import { Locket } from '../../../core/locket';
+import { Sfx } from '../../../core/sfx';
 import { RomanPipe, toRoman } from '../../../core/roman';
 import type { StoryEntry } from '../../../core/story';
 import { InkText } from '../../../ui/ink-text';
 import { SITE } from '../../../../stories/site';
 import type { VolumeDetail } from '../shelf';
-import type { Stage } from '../stage/engine';
+import type { Prop, Stage } from '../stage/engine';
 import { STOPS, Stop } from '../stage/journey';
 
 interface Volume {
@@ -38,7 +43,7 @@ interface Volume {
   imports: [InkText, RomanPipe],
   templateUrl: './reading-room.html',
   styleUrl: './reading-room.scss',
-  host: { '[class.is-holding]': '!!held()' },
+  host: { '[class.is-holding]': '!!held()', '[class.is-through]': 'through()' },
 })
 export class ReadingRoom {
   readonly stories = input.required<readonly StoryEntry[]>();
@@ -47,17 +52,24 @@ export class ReadingRoom {
   readonly read = output<StoryEntry>();
   /** The room could not be built here; the flat library should stand in. */
   readonly failed = output<void>();
+  /** Out through the window, to the reasons beyond it. */
+  readonly wander = output<void>();
 
   protected readonly site = SITE;
   protected readonly labels = labelsFor(SITE.lang);
+  protected readonly play = playLabelsFor(SITE.lang);
   protected readonly volumes = computed<Volume[]>(() =>
     this.stories().map((story, i) => ({ story, volume: i + 1, roman: toRoman(i + 1) })),
   );
   protected readonly ready = signal(false);
+  /** "Just for you" on the server; by the hour of her visit, in the browser. */
+  protected readonly greeting = signal(this.labels.justForYou);
   protected readonly hovered = signal<string | null>(null);
   protected readonly held = signal<Volume | null>(null);
   protected readonly settled = signal(false);
   protected readonly leaving = signal(false);
+  /** Flying out through the window. */
+  protected readonly through = signal(false);
   /** Which moment of the journey is on screen, for what can be pressed. */
   protected readonly atShelf = signal(false);
   /** How far the room has got with being built, 0 to 1. */
@@ -76,13 +88,24 @@ export class ReadingRoom {
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private readonly panel = viewChild.required<ElementRef<HTMLDialogElement>>('panel');
   private readonly readButton = viewChild<ElementRef<HTMLButtonElement>>('readButton');
+  private readonly keepsakes = inject(Keepsakes);
+  private readonly sfx = inject(Sfx);
   private stage?: Stage;
+  /** The lamp has been switched off at least once, so switching it on is lighting it. */
+  private lampWasOff = false;
 
   private destroyed = false;
 
   constructor() {
     const destroyRef = inject(DestroyRef);
+    // With the locket open over it, the room rests rather than drawing unseen.
+    const locket = inject(Locket);
+    effect(() => {
+      const covered = locket.isOpen();
+      if (this.ready()) this.stage?.setPaused(covered);
+    });
     afterNextRender(() => {
+      this.greeting.set(this.play.greeting(new Date().getHours()));
       let stop = () => {};
       void this.build().then((cleanup) => (stop = cleanup));
       destroyRef.onDestroy(() => {
@@ -111,6 +134,7 @@ export class ReadingRoom {
     if (!this.stage || this.held()) return;
     this.held.set(volume);
     this.settled.set(false);
+    this.keepsakes.unlock('shelf');
     this.panel().nativeElement.showModal();
     await this.stage.takeDown(volume.story.slug);
     if (this.held() !== volume) return;
@@ -143,8 +167,63 @@ export class ReadingRoom {
     if (!(event.target as HTMLElement).closest('.panel__card')) void this.putBack();
   }
 
+  /**
+   * Turns to the tall window, throws it open and flies out through it, to
+   * the reasons I love you. From anywhere in the room.
+   */
+  async throughWindow(): Promise<void> {
+    if (this.through() || this.leaving()) return;
+    // Not built yet (or never will be here): straight through, then.
+    if (!this.stage) {
+      this.wander.emit();
+      return;
+    }
+    if (this.held()) {
+      this.panel().nativeElement.close();
+      this.held.set(null);
+      this.settled.set(false);
+    }
+    this.through.set(true);
+    this.sfx.play('flip');
+    this.keepsakes.unlock('window');
+    await this.stage.throughWindow();
+    this.wander.emit();
+  }
+
+  /** Something in the room, touched: the lamp switches, the window opens, the rest jolt. */
+  private touch(stage: Stage, prop: Prop): void {
+    if (prop === 'window') {
+      void this.throughWindow();
+      return;
+    }
+    if (prop === 'lamp') {
+      const on = stage.toggleLamp();
+      this.sfx.play('click');
+      if (!on) this.lampWasOff = true;
+      else if (this.lampWasOff) this.keepsakes.unlock('lamp');
+      return;
+    }
+    stage.nudge(prop);
+    this.sfx.play(prop === 'inkwell' ? 'tick' : 'flip');
+    this.keepsakes.unlock(prop);
+  }
+
+  private propLabel(prop: Prop): string {
+    if (prop === 'lamp') {
+      return this.stage?.lampOn() === false ? this.play.switchOn : this.play.switchOff;
+    }
+    if (prop === 'window') return this.play.openWindow;
+    return prop === 'inkwell' ? this.play.dipQuill : this.play.leafThrough;
+  }
+
   private async build(): Promise<() => void> {
     const canvas = this.canvas().nativeElement;
+    // What a press would do here, for the brass cursor ring.
+    const aim = (label: string | null) => {
+      if (label) canvas.dataset['cursor'] = label;
+      else delete canvas.dataset['cursor'];
+      canvas.style.cursor = label ? 'pointer' : '';
+    };
     const lite = matchMedia('(max-width: 767px), (pointer: coarse)').matches;
     let stage: Stage;
     try {
@@ -152,7 +231,6 @@ export class ReadingRoom {
       stage = await createStage(canvas, {
         lite,
         onProgress: (done) => this.built.set(done),
-        paper: '/textures/paper.webp',
         volumeLabel: this.labels.volume,
         note: SITE.preface,
         volumes: this.volumes().map((v) => {
@@ -161,10 +239,9 @@ export class ReadingRoom {
         }),
         onHover: (slug) => {
           this.hovered.set(slug);
-          if (slug) canvas.dataset['cursor'] = this.labels.takeDownShort;
-          else delete canvas.dataset['cursor'];
-          canvas.style.cursor = slug ? 'pointer' : '';
+          aim(slug ? this.labels.takeDownShort : null);
         },
+        onProp: (prop) => aim(prop ? this.propLabel(prop) : null),
       });
     } catch {
       if (!this.destroyed) this.failed.emit();
@@ -188,7 +265,11 @@ export class ReadingRoom {
       stage.setProgress(p);
       style.setProperty('--p', p.toFixed(4));
       const nearest = this.stops.reduce((a, b) => (Math.abs(b.at - p) < Math.abs(a.at - p) ? b : a));
-      if (nearest.key !== this.here()) this.here.set(nearest.key);
+      if (nearest.key !== this.here()) {
+        this.here.set(nearest.key);
+        // Coming over the letter as it unfolds is finding it.
+        if (nearest.key === 'letter') this.keepsakes.unlock('letter');
+      }
       // Each moment's words come and go with the camera.
       style.setProperty('--title', String(fade(p, -1, 0, 0.05, 0.13)));
       style.setProperty('--letter', String(fade(p, 0.3, 0.38, 0.5, 0.58)));
@@ -216,7 +297,18 @@ export class ReadingRoom {
         -(event.clientY / innerHeight) * 2 + 1,
       );
       const volume = slug ? this.titleOf(slug) : undefined;
-      if (volume) void this.takeDown(volume);
+      if (volume) {
+        void this.takeDown(volume);
+        return;
+      }
+      const prop = stage.pickProp(
+        (event.clientX / innerWidth) * 2 - 1,
+        -(event.clientY / innerHeight) * 2 + 1,
+      );
+      if (prop) {
+        this.touch(stage, prop);
+        aim(this.propLabel(prop));
+      }
     };
 
     measure();

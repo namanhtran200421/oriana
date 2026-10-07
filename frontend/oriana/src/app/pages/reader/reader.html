@@ -11,6 +11,16 @@
 
   <div class="bar__tools">
     <app-music-toggle [lang]="story().lang" />
+    <app-locket-button class="bar__locket" [lang]="story().lang" />
+    <button
+      type="button"
+      class="btn btn--icon bar__aa"
+      popovertarget="reading-settings"
+      [attr.aria-label]="play().readingSettings"
+      [attr.title]="play().readingSettings"
+    >
+      <span aria-hidden="true">Aa</span>
+    </button>
     <button
       type="button"
       class="btn btn--icon"
@@ -131,3 +141,59 @@
     </button>
   </div>
 </dialog>
+
+<div id="reading-settings" class="reading-settings" popover>
+  <p class="overline">{{ play().readingSettings }}</p>
+  <div class="reading-settings__row">
+    <span>{{ play().textSize }}</span>
+    <span class="stepper">
+      <button
+        type="button"
+        class="stepper__step"
+        [disabled]="!settings.canShrink()"
+        [attr.aria-label]="play().smaller"
+        (click)="settings.stepText(-1)"
+      >
+        A−
+      </button>
+      <span class="stepper__sample" [style.font-size.em]="settings.textScale()">Aa</span>
+      <button
+        type="button"
+        class="stepper__step"
+        [disabled]="!settings.canGrow()"
+        [attr.aria-label]="play().larger"
+        (click)="settings.stepText(1)"
+      >
+        A+
+      </button>
+    </span>
+  </div>
+  <div class="reading-settings__row">
+    <span>{{ play().candlelight }}</span>
+    <button
+      type="button"
+      role="switch"
+      class="switch"
+      [attr.aria-checked]="settings.candlelight()"
+      [attr.aria-label]="play().candlelight"
+      (click)="settings.toggle('candlelight')"
+    >
+      <span class="switch__knob"></span>
+    </button>
+  </div>
+  <p class="overline overline--muted reading-settings__keys-title">{{ play().keys }}</p>
+  <dl class="reading-settings__keys">
+    <div>
+      <dt><kbd>←</kbd> <kbd>→</kbd></dt>
+      <dd>{{ play().keyTurn }}</dd>
+    </div>
+    <div>
+      <dt><kbd>+</kbd> <kbd>−</kbd></dt>
+      <dd>{{ play().keyText }}</dd>
+    </div>
+    <div>
+      <dt><kbd>Home</kbd> <kbd>End</kbd></dt>
+      <dd>{{ play().keyEnds }}</dd>
+    </div>
+  </dl>
+</div>

@@ -1,6 +1,8 @@
-import { Injectable, Signal, computed, signal } from '@angular/core';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Delight } from '../../core/delight';
 import { labelsFor } from '../../core/i18n';
-import type { StoryEntry } from '../../core/story';
+import { Keepsakes } from '../../core/keepsakes';
+import type { StoryEntry, Treasure } from '../../core/story';
 import { volumeOf } from '../../../stories/library';
 import {
   BookPageRef,
@@ -39,6 +41,32 @@ export class ReaderContext {
     const last = this.lastSpread();
     return last > 1 ? Math.min(1, Math.max(0, (this.spread() - 1) / (last - 1))) : 0;
   });
+
+  private readonly keepsakes = inject(Keepsakes);
+  private readonly delight = inject(Delight);
+
+  /**
+   * The pages pressed keepsakes lie on (a flower, a clover…), spaced evenly
+   * through the body of the book, each gone once it has been found.
+   */
+  readonly treasures = computed(() => {
+    const placed = new Map<number, Treasure>();
+    const treasures = this.story().treasures ?? [];
+    const body = this.pages().filter((page) => page.kind === 'chapter' && !page.opener);
+    if (!body.length) return placed;
+    treasures.forEach((treasure, i) => {
+      if (this.keepsakes.foundMap()[treasure]) return;
+      const at = Math.floor((body.length * (i + 1)) / (treasures.length + 1));
+      placed.set(body[Math.min(at, body.length - 1)].index, treasure);
+    });
+    return placed;
+  });
+
+  /** A pressed keepsake, picked up from the page where it was touched. */
+  findTreasure(treasure: Treasure, x: number, y: number): void {
+    this.delight.burst(x, y, 14);
+    this.keepsakes.unlock(treasure);
+  }
 
   facesAt(spread: number): SpreadFaces {
     return facesAt(this.mode(), this.pages(), spread);

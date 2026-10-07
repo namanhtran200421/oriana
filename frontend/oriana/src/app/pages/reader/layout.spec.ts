@@ -22,6 +22,17 @@ describe('computeLayout', () => {
     }
   });
 
+  it('sets the type larger or smaller on request, on the same page', () => {
+    const plain = computeLayout(1440, 900);
+    const larger = computeLayout(1440, 900, 1.25);
+    const smaller = computeLayout(1440, 900, 0.9);
+    expect(larger.pageW).toBe(plain.pageW);
+    expect(larger.fontSize).toBeGreaterThan(plain.fontSize);
+    expect(smaller.fontSize).toBeLessThan(plain.fontSize);
+    expect(sameFlow(plain, larger)).toBe(false);
+    expect(larger.flowH % larger.leading).toBe(0);
+  });
+
   it('knows when a resize would not change the pagination', () => {
     expect(sameFlow(computeLayout(1440, 900), computeLayout(1440, 900))).toBe(true);
     expect(sameFlow(computeLayout(1440, 900), computeLayout(390, 844))).toBe(false);

@@ -1,38 +1,46 @@
 import { Component, input } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 
-let nextId = 0;
-
-/**
- * An irregular wax edge: a circle nudged by a few layered sine waves, smoothed
- * through Catmull-Rom splines. Deterministic, so server and browser agree.
- */
-function waxOutline(points = 24, radius = 55, centre = 60): string {
-  const at = (i: number): [number, number] => {
-    const angle = (i / points) * Math.PI * 2;
-    const r =
-      radius +
-      Math.sin(angle * 3 + 0.6) * 1.7 +
-      Math.sin(angle * 7 + 2.1) * 1.1 +
-      Math.sin(angle * 11 + 4.4) * 0.7;
-    return [centre + Math.cos(angle) * r, centre + Math.sin(angle) * r];
-  };
-  const pts = Array.from({ length: points }, (_, i) => at(i));
-  const p = (i: number) => pts[(i + points) % points];
-  const f = (n: number) => n.toFixed(2);
-  let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
-  for (let i = 0; i < points; i++) {
-    const [p0, p1, p2, p3] = [p(i - 1), p(i), p(i + 1), p(i + 2)];
-    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-    d += `C${f(c1[0])} ${f(c1[1])} ${f(c2[0])} ${f(c2[1])} ${f(p2[0])} ${f(p2[1])}`;
-  }
-  return d + 'Z';
+interface Pixel {
+  x: number;
+  y: number;
+  fill: string;
 }
 
-const OUTLINE = waxOutline();
+/**
+ * A wax seal in big pixels, sixteen across: a round blob with a drip or two,
+ * lit from the top left, a ring pressed into it. Worked out once; the same
+ * on the server as in the browser.
+ */
+function waxPixels(): Pixel[] {
+  const pixels: Pixel[] = [];
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const dx = x - 7.5;
+      const dy = y - 7.5;
+      const angle = Math.atan2(dy, dx);
+      const d = Math.hypot(dx, dy) - Math.sin(angle * 5 + 1.3) * 0.35;
+      if (d > 7.4) continue;
+      let fill = '#a3203a';
+      if (d > 6.4) fill = '#6e1424';
+      else if (d > 4.4 && d < 5.4) fill = '#7a1730';
+      else if (dx + dy < -5 && d < 6.4) fill = '#c23a52';
+      if (dx > 3 && dy > 3 && d > 5.4 && d <= 6.4) fill = '#86182e';
+      pixels.push({ x, y, fill });
+    }
+  }
+  return pixels;
+}
 
-/** A crimson wax seal pressed with a monogram (or a star), that can be broken. */
+/** A small heart for a seal without a letter. */
+const HEART = ['.##.##.', '#######', '#######', '.#####.', '..###..', '...#...'];
+const HEART_PIXELS: Pixel[] = HEART.flatMap((row, y) =>
+  [...row].flatMap((ch, x) => (ch === '#' ? [{ x: x + 4.5, y: y + 5, fill: '#5c1020' }] : [])),
+);
+
+const PIXELS = waxPixels();
+
+/** A crimson wax seal, in pixels, pressed with a monogram (or a heart), that can be broken. */
 @Component({
   selector: 'app-wax-seal',
   imports: [NgTemplateOutlet],
@@ -52,8 +60,6 @@ export class WaxSeal {
   /** Cracks the seal in two and lets the halves fall away. */
   readonly broken = input(false);
 
-  protected readonly id = `wax-${nextId++}`;
-  protected readonly outline = OUTLINE;
-  protected readonly star =
-    'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z';
+  protected readonly pixels = PIXELS;
+  protected readonly heart = HEART_PIXELS;
 }

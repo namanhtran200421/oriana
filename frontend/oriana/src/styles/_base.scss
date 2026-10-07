@@ -18,9 +18,9 @@ body {
   color: var(--color-fg);
   font-family: var(--font-body);
   font-size: 1.0625rem;
-  line-height: 1.625;
-  font-kerning: normal;
-  text-rendering: optimizeLegibility;
+  line-height: 1.55;
+  // A pixel face has no italic; leaning its squares only blurs them.
+  font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -31,9 +31,9 @@ h3,
 h4 {
   margin: 0;
   font-family: var(--font-heading);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0;
   text-wrap: balance;
 }
 
@@ -62,12 +62,12 @@ svg {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brass);
+  outline: var(--px) solid var(--color-brass);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: rgb(201 169 98 / 0.32);
+  background: rgb(255 208 74 / 0.4);
   color: var(--color-fg);
 }
 
@@ -91,8 +91,8 @@ svg {
 }
 
 .fonts-ready .reveal {
-  animation: ink-in 1500ms var(--ease-ink) both;
-  animation-delay: calc(var(--d, 0) * 140ms + 60ms);
+  animation: ink-in 900ms var(--ease-pop) both;
+  animation-delay: calc(var(--d, 0) * 110ms + 60ms);
 }
 
 // Below-the-fold reveal, driven by the [appReveal] directive.
@@ -113,7 +113,7 @@ svg {
 @keyframes ink-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 0.5rem, 0);
+    transform: translate3d(0, 0.75rem, 0);
   }
   to {
     opacity: 1;

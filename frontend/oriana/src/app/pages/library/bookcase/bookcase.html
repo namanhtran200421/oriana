@@ -5,9 +5,15 @@
     <span class="case__plate">{{ plate() }}</span>
   </div>
 
-  <div class="case__lamp" aria-hidden="true">
+  <div class="case__lamp" aria-hidden="true" [class.is-off]="lampOff()">
     <span class="case__lamp-arm"></span>
-    <span class="case__lamp-shade"></span>
+    <button
+      type="button"
+      class="case__lamp-shade"
+      tabindex="-1"
+      [attr.data-cursor]="lampOff() ? play.switchOn : play.switchOff"
+      (click)="toggleLamp()"
+    ></button>
     <span class="case__lamp-light"></span>
   </div>
 
